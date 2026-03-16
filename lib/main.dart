@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/splash.dart';
+import 'package:litshelf/screen/onbroading%20and%20splash/splash.dart';
 
 void main() {
   runApp(const MyApp());

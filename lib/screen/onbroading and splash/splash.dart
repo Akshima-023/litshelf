@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/onbroading.dart';
-import 'package:litshelf/textstyle/text.dart';
+import 'package:litshelf/screen/onbroading%20and%20splash/onbroading.dart';
+import 'package:litshelf/theme/text.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/textstyle/text.dart';
+import 'package:litshelf/theme/text.dart';
 
 class OnboardingWidget extends StatelessWidget {
   final String title;
@@ -15,16 +15,18 @@ class OnboardingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(image, height: 250),
-        const SizedBox(height: 20),
-        Text(
+        Image.asset(image, height: size.height*0.30),
+  SizedBox(height:size.height*0.01),
+          Text(
           title,
           style: AppTextStyles.des20bw
         ),
-        const SizedBox(height: 10),
+         SizedBox(height:size.height*0.01),
         Text(
           description,
           style: AppTextStyles.text18g,
