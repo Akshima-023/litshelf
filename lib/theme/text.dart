@@ -39,4 +39,29 @@ class AppTextStyles{
    
     color:Color.fromARGB(255, 17, 17, 17)
   );
+  static TextStyle des18bb = TextStyle(
+    fontSize: 18,
+   fontWeight: .bold,
+    color:Color.fromARGB(255, 17, 17, 17)
+  );
+  static TextStyle text18bg = TextStyle(
+    fontSize: 18,
+    fontWeight: .bold,
+    color:Colors.grey
+  );
+   static TextStyle text16bb = TextStyle(
+    fontSize: 16,
+   fontWeight: .bold,
+    color:Color.fromARGB(255, 17, 17, 17)
+  );
+   static TextStyle text16r = TextStyle(
+    fontSize: 16,
+   
+    color:Color.fromARGB(255, 201, 51, 51)
+  );
+    static TextStyle text16g = TextStyle(
+    fontSize: 18,
+   
+    color:Colors.grey
+  );
 }

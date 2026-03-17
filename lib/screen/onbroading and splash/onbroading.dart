@@ -78,14 +78,14 @@ class _OnbroadingState extends State<Onbroading> {
                       image: "assets/onbroad1-removebg.png",
                       title: "Your Bookish Soulmate Awaits",
                       description:
-                      "Discover new words, join a vibrant reading community. Start your reading adventure effortlessly with us.",
+                      "Let us be your guide to your perfect read.Discover books tailored to your tastes for a truly rewarding experience.",
                     ),
                                 
                     OnboardingWidget(
                       image: "assets/onbroad_2-removebg.png",
                       title: "Start Your Adventure",
                       description:
-                      "Discover new words, join a vibrant reading community. Start your reading adventure effortlessly with us.",
+                      "Ready to embark on a quest for your inspiration and knowledge?Your story begins now.let's go! ",
                     ),
                                 
                   ],
@@ -112,9 +112,6 @@ class _OnbroadingState extends State<Onbroading> {
               ),
 
               SizedBox(height: size.height * 0.06),
-              
-
-/// Get Started Button
 PurpleButton(
   text: currentIndex == 0 ? "Continue" : "Get Started",
   onTap: () {
@@ -124,14 +121,16 @@ PurpleButton(
         curve: Curves.easeIn,
       );
     } else {
-      
+       Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Login(),
+        ),
+      );
     }
   },
 ),
-
 SizedBox(height: size.height * 0.015),
-
-/// Sign In
 Row(
   mainAxisAlignment: MainAxisAlignment.center,
   children:  [

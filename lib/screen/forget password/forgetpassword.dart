@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:litshelf/screen/signin%20and%20signup/login.dart';
 import 'package:litshelf/screen/forget%20password/password.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/customfield.dart';
+import 'package:litshelf/widget/customtextfield.dart';
 import 'package:litshelf/widget/purplebutton.dart';
 
 class Forgetpassword extends StatefulWidget {
@@ -75,6 +75,7 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                     hintText: "Your password",
                     obscureText: true,
                     icon: Icons.visibility_off,
+                    
                     ),
                   SizedBox(height: size.height * 0.08),
                 ],

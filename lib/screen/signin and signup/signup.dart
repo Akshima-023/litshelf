@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:litshelf/screen/signin%20and%20signup/Register.dart';
 import 'package:litshelf/screen/signin%20and%20signup/login.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/customfield.dart';
+import 'package:litshelf/widget/customtextfield.dart';
 import 'package:litshelf/widget/purplebutton.dart';
 
 class Signup extends StatefulWidget {
