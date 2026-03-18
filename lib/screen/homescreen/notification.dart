@@ -31,7 +31,7 @@ class _NotificationState extends State<Notification> {
                              Navigator.pushReplacement(
                              context,
                              MaterialPageRoute(
-                             builder: (context) => const Homepage(),
+                             builder: (context) => const HomePage()
                               ),
                               );
                             },

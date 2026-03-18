@@ -60,8 +60,18 @@ class AppTextStyles{
     color:Color.fromARGB(255, 201, 51, 51)
   );
     static TextStyle text16g = TextStyle(
-    fontSize: 18,
+    fontSize: 16,
    
     color:Colors.grey
+  );
+  static TextStyle text14g = TextStyle(
+    fontSize: 14,
+   
+    color:Colors.grey
+  );
+   static TextStyle text14bb = TextStyle(
+    fontSize: 14,
+   fontWeight: .bold,
+    color:Colors.black
   );
 }

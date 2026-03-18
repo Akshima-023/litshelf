@@ -30,9 +30,9 @@ class _DashboardPageState extends State<DashboardPage> {
     final Size size = MediaQuery.of(context).size;
 
     List<Widget> screens = [
-      const Homepage(),
+      const HomePage(),
       const Menu(),
-   const Confirmorder(),
+      const Confirmorder(),
       const Profile(),
     ];
 

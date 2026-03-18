@@ -41,12 +41,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      height: size.height * 0.07,
+      height: size.height * 0.06,
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-
-        /// Purple border when focused
+        borderRadius: BorderRadius.circular(12),        
         border: Border.all(
           color: isFocused
               ? const Color.fromARGB(255, 138, 112, 198)
