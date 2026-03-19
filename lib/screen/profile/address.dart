@@ -95,7 +95,7 @@ class _AddressState extends State<Address> {
               ),
               SizedBox(height: size.height * 0.02),
               Container(
-                height: size.height * 0.25,
+                height: size.height * 0.30,
                 width: double.infinity,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),

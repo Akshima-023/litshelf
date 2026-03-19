@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:litshelf/theme/text.dart';
+import 'package:litshelf/widget/vendorpage.dart';
 
 class VendorsWidget extends StatelessWidget {
   const VendorsWidget({super.key});
@@ -44,29 +46,45 @@ class VendorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
      final Size size = MediaQuery.of(context).size;
-    return Container(
-      width:  size.width * 0.25,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl,
-              height: size.height * 0.10,
-              width: size.width * 0.25,
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(height: size.height * 0.01,),
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
+    return  GestureDetector(
+   onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => VendorPage(
+        vendorName: name,
+        vendorImage: imageUrl,
       ),
+    ),
+  );
+},
+      child: Container(
+        width:  size.width * 0.25,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                height: size.height * 0.10,
+                width: size.width * 0.25,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(height: size.height * 0.01,),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    
     );
+    
   }
+  
 }
