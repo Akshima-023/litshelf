@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart' hide Notification;
+
 import 'package:litshelf/screen/homescreen/notification.dart';
 import 'package:litshelf/screen/homescreen/search.dart';
-import 'package:litshelf/screen/service/api.dart';
+
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/author.dart';
+import 'package:litshelf/widget/author.dart' show AuthorsWidget;
+
 import 'package:litshelf/widget/topofweek.dart';
 import 'package:litshelf/widget/vendors.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  
+  
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 class _HomePageState extends State<HomePage> {
-  late Future<List<dynamic>> booksFuture;
+ final supabase = Supabase.instance.client;
 
-  @override
-  void initState() {
-    super.initState();
-    booksFuture = BookApi.fetchBooks();
-  }
-  Map<String, String> authorImages = {
-  "J.K. Rowling": "https://upload.wikimedia.org/wikipedia/commons/5/5d/J._K._Rowling_2010.jpg",
-  "George Orwell": "https://upload.wikimedia.org/wikipedia/commons/c/c3/George_Orwell_press_photo.jpg",
-  "Stephen King": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Stephen_King%2C_Comicon.jpg"
+Future<List<dynamic>> fetchBooks() async {
+  return await supabase
+      .from('book_details')
+      .select('id, book_image, book_name');
+}
 
-};
+  
 
   @override
   Widget build(BuildContext context) {
+    
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -92,22 +94,17 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
-                      Image.network(
-                        "https://picsum.photos/100",
-                        height: 100,
-                      ),
+                     
+                      
                     ],
                   ),
                 ),
                SizedBox(height: size.height * 0.03),
-                TopOfWeekWidget(booksFuture: booksFuture),
-               SizedBox(height: size.height * 0.03),                      
-              const VendorsWidget(),
+                TopOfWeekWidget( booksFuture: Future.value([])),
+               SizedBox(height: size.height * 0.0),                      
+             VendorsWidget(),
               SizedBox(height: size.height * 0.02),   
-              AuthorsWidget(
-              booksFuture: booksFuture,
-              authorImages: authorImages,
-              ),           
+             AuthorsWidget(),
               SizedBox(height: size.height * 0.03),
               ],
             ),

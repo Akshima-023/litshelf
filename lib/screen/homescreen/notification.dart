@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/homescreen/homepage.dart';
 import 'package:litshelf/theme/text.dart';
 
 class Notification extends StatefulWidget {
@@ -28,12 +27,7 @@ class _NotificationState extends State<Notification> {
                         children: [
                           IconButton(
                            onPressed: () {
-                             Navigator.pushReplacement(
-                             context,
-                             MaterialPageRoute(
-                             builder: (context) => const HomePage()
-                              ),
-                              );
+                            Navigator.pop(context); 
                             },
                             icon: Icon(
                             Icons.arrow_back,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:litshelf/screen/forget%20password/forgetpassword.dart';
+import 'package:litshelf/screen/homescreen/dashboard.dart';
 import 'package:litshelf/screen/homescreen/homepage.dart';
 import 'package:litshelf/screen/onbroading%20and%20splash/onbroading.dart';
 import 'package:litshelf/screen/signin%20and%20signup/signup.dart';
@@ -112,7 +113,7 @@ class _LoginState extends State<Login> {
                  Navigator.push(
                     context,
                     MaterialPageRoute(
-                    builder: (context) => const HomePage()
+                    builder: (context) => const DashboardPage()
                     ),
                     );
               },

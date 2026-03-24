@@ -32,7 +32,7 @@ class _DashboardPageState extends State<DashboardPage> {
     List<Widget> screens = [
       const HomePage(),
       const Menu(),
-      const Confirmorder(),
+      const ConfirmOrderScreen(),
       const Profile(),
     ];
 

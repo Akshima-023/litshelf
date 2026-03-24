@@ -17,14 +17,11 @@ class _ShowpaymentsheetState extends State<Showpaymentsheet> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-
-          // 🔹 Top drag handle
+        children: [         
           Container(
             height: size.height * 0.005,
             width: size.width * 0.1,
@@ -33,18 +30,12 @@ class _ShowpaymentsheetState extends State<Showpaymentsheet> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-
-          SizedBox(height: size.height * 0.02),
-
-          // 🔹 Title
+          SizedBox(height: size.height * 0.02),      
           Text(
             "Select Payment Method",
             style: AppTextStyles.des18bb,
           ),
-
-          SizedBox(height: size.height * 0.02),
-
-          // 🔹 UPI Option
+          SizedBox(height: size.height * 0.02),         
           GestureDetector(
             onTap: () {
               setState(() {
@@ -71,9 +62,7 @@ class _ShowpaymentsheetState extends State<Showpaymentsheet> {
                 ],
               ),
             ),
-          ),
-
-          // 🔹 Card Option
+          ),         
           GestureDetector(
             onTap: () {
               setState(() {
@@ -101,9 +90,7 @@ class _ShowpaymentsheetState extends State<Showpaymentsheet> {
               ),
             ),
           ),
-
           SizedBox(height: size.height * 0.01),
-
   PurpleButton(
   text: "Confirm",
   onTap: () {

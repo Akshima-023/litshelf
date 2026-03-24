@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:litshelf/screen/cart%20and%20checkout/locationformpage.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/widget/buildtag.dart';
 import 'package:litshelf/widget/purplebutton.dart';
@@ -150,25 +151,35 @@ class _AddressState extends State<Address> {
                  SizedBox(width: size.width*0.08),
 
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          titleAddress,
-                          style: AppTextStyles.text16bb,
-                        ),
-                        Text(
-                          subAddress,
-                          style: AppTextStyles.text14g,
-                        ),
-                        SizedBox(height: size.height * 0.02),
-                        Container(
-                          height: size.height * 0.001,
-                          width: double.infinity,
-                          color: Colors.grey,
-                        ),
-                      ],
+                    child: InkWell(onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LocationFormPage()
+      ),
+    );
+    
+  },
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            titleAddress,
+                            style: AppTextStyles.text16bb,
+                          ),
+                          Text(
+                            subAddress,
+                            style: AppTextStyles.text14g,
+                          ),
+                          SizedBox(height: size.height * 0.02),
+                          Container(
+                            height: size.height * 0.001,
+                            width: double.infinity,
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
