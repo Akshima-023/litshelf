@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:litshelf/screen/cart%20and%20checkout/locationformpage.dart';
-import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/widget/buildtag.dart';
 import 'package:litshelf/widget/purplebutton.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geocoding/geocoding.dart';
 
+
+
+import '../../theme/text.dart';
 
 class Address extends StatefulWidget {
   const Address({super.key});
@@ -17,31 +19,50 @@ class Address extends StatefulWidget {
 }
 
 class _AddressState extends State<Address> {
-  int selectedIndex = 0;
+  LatLng selectedLocation = LatLng(11.2588, 75.7804);
 
-  LatLng selectedLocation = LatLng(8.5241, 76.9366);
-
-  String titleAddress = "Select location";
+  String titleAddress = "Tap to add address";
   String subAddress = "";
+
+  int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    getAddressFromLatLng(selectedLocation);
+    loadAddressByType(); // ✅ ONLY THIS
   }
-  Future<void> saveAddress() async {
-  final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString("titleAddress", titleAddress);
-  await prefs.setString("subAddress", subAddress);
-  await prefs.setDouble("lat", selectedLocation.latitude);
-  await prefs.setDouble("lng", selectedLocation.longitude);
-  await prefs.setString(
-    "type",
-    selectedIndex == 0 ? "Home" : "Office",
-  );
-}
+  // ✅ LOAD BASED ON HOME / OFFICE
+  void loadAddressByType() async {
+    final prefs = await SharedPreferences.getInstance();
 
+    String type = selectedIndex == 0 ? "home" : "office";
+
+    setState(() {
+      titleAddress =
+          prefs.getString("${type}_street") ?? "Tap to add address";
+      subAddress = prefs.getString("${type}_sub") ?? "";
+    });
+
+    // ✅ Move map to saved location
+    if (titleAddress != "Tap to add address") {
+      try {
+        List<Location> locations =
+            await locationFromAddress(titleAddress);
+
+        if (locations.isNotEmpty) {
+          setState(() {
+            selectedLocation = LatLng(
+              locations.first.latitude,
+              locations.first.longitude,
+            );
+          });
+        }
+      } catch (e) {}
+    }
+  }
+
+  // ✅ MAP CLICK → GET ADDRESS + SAVE
   Future<void> getAddressFromLatLng(LatLng position) async {
     try {
       List<Placemark> placemarks =
@@ -52,10 +73,20 @@ class _AddressState extends State<Address> {
 
       Placemark place = placemarks[0];
 
+      String street = place.street ?? "Unknown place";
+      String sub =
+          "${place.locality}, ${place.administrativeArea}, ${place.country}";
+
+      String type = selectedIndex == 0 ? "home" : "office";
+
+      final prefs = await SharedPreferences.getInstance();
+
+      await prefs.setString("${type}_street", street);
+      await prefs.setString("${type}_sub", sub);
+
       setState(() {
-        titleAddress = place.street ?? "Unknown place";
-        subAddress =
-            "${place.locality}, ${place.administrativeArea}, ${place.country}";
+        titleAddress = street;
+        subAddress = sub;
       });
     } catch (e) {
       setState(() {
@@ -65,9 +96,20 @@ class _AddressState extends State<Address> {
     }
   }
 
+  // ✅ SAVE BUTTON
+  Future<void> saveAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String type = selectedIndex == 0 ? "home" : "office";
+
+    await prefs.setString("${type}_street", titleAddress);
+    await prefs.setString("${type}_sub", subAddress);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -76,7 +118,10 @@ class _AddressState extends State<Address> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               SizedBox(height: size.height * 0.02),
+
+              // 🔹 HEADER
               Row(
                 children: [
                   IconButton(
@@ -94,8 +139,11 @@ class _AddressState extends State<Address> {
                   SizedBox(width: size.width * 0.1),
                 ],
               ),
+
               SizedBox(height: size.height * 0.02),
-              Container(
+
+              // 🔹 MAP
+              SizedBox(
                 height: size.height * 0.30,
                 width: double.infinity,
                 child: ClipRRect(
@@ -108,8 +156,7 @@ class _AddressState extends State<Address> {
                         setState(() {
                           selectedLocation = point;
                         });
-
-                        getAddressFromLatLng(point);
+                        getAddressFromLatLng(point); // 🔥
                       },
                     ),
                     children: [
@@ -122,8 +169,8 @@ class _AddressState extends State<Address> {
                         markers: [
                           Marker(
                             point: selectedLocation,
-                            width: size.width*0.03,
-                            height: size.height*0.02,
+                            width: 40,
+                            height: 40,
                             child: const Icon(
                               Icons.location_on,
                               color: Colors.purple,
@@ -138,41 +185,47 @@ class _AddressState extends State<Address> {
               ),
 
               SizedBox(height: size.height * 0.04),
-              Text(
-                "Detail Address",
-                style: AppTextStyles.text16bb,
-              ),
+
+              Text("Detail Address", style: AppTextStyles.text16bb),
+
               SizedBox(height: size.height * 0.03),
+
+              // 🔹 ADDRESS DISPLAY
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on,
-                      color: Colors.deepPurple),
-                 SizedBox(width: size.width*0.08),
+                  const Icon(Icons.location_on, color: Colors.deepPurple),
+                  SizedBox(width: size.width * 0.08),
 
                   Expanded(
-                    child: InkWell(onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LocationFormPage()
-      ),
-    );
-    
-  },
+                    child: InkWell(
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const LocationFormPage(),
+                          ),
+                        );
+
+                        if (result == "home") {
+                          setState(() => selectedIndex = 0);
+                        } else if (result == "office") {
+                          setState(() => selectedIndex = 1);
+                        }
+
+                        loadAddressByType(); // 🔥 refresh
+                      },
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            titleAddress,
-                            style: AppTextStyles.text16bb,
-                          ),
-                          Text(
-                            subAddress,
-                            style: AppTextStyles.text14g,
-                          ),
+                          Text(titleAddress,
+                              style: AppTextStyles.text16bb),
+                          Text(subAddress,
+                              style: AppTextStyles.text14g),
+
                           SizedBox(height: size.height * 0.02),
+
                           Container(
                             height: size.height * 0.001,
                             width: double.infinity,
@@ -184,21 +237,21 @@ class _AddressState extends State<Address> {
                   ),
                 ],
               ),
+
               SizedBox(height: size.height * 0.03),
-              Text(
-                "Save Address As",
-                style: AppTextStyles.text16bb,
-              ),
+
+              Text("Save Address As", style: AppTextStyles.text16bb),
+
               SizedBox(height: size.height * 0.02),
+
               Row(
                 children: [
                   BuildTag(
                     text: "Home",
                     isSelected: selectedIndex == 0,
                     onTap: () {
-                      setState(() {
-                        selectedIndex = 0;
-                      });
+                      setState(() => selectedIndex = 0);
+                      loadAddressByType();
                     },
                   ),
                   SizedBox(width: size.width * 0.02),
@@ -206,27 +259,28 @@ class _AddressState extends State<Address> {
                     text: "Office",
                     isSelected: selectedIndex == 1,
                     onTap: () {
-                      setState(() {
-                        selectedIndex = 1;
-                      });
+                      setState(() => selectedIndex = 1);
+                      loadAddressByType();
                     },
                   ),
                 ],
               ),
 
               const Spacer(),
+
               PurpleButton(
-             text: "Confirmation",
-            onTap: () async {
-           await saveAddress();
-           ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-          content: Text("Address Saved Successfully"),
-          ),
-          );
-          },
-)
-,SizedBox(height: size.height * 0.05),
+                text: "Confirmation",
+                onTap: () async {
+                  await saveAddress();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Address Saved Successfully"),
+                    ),
+                  );
+                },
+              ),
+
+              SizedBox(height: size.height * 0.05),
             ],
           ),
         ),

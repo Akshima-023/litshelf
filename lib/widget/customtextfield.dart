@@ -5,12 +5,13 @@ class CustomTextField extends StatefulWidget {
   final String hintText;
   final bool obscureText;
   final IconData? icon;
+   final TextEditingController? controller;
 
   const CustomTextField({
     super.key,
     required this.hintText,
     this.obscureText = false,
-    this.icon,
+    this.icon, this.controller,
   });
 
   @override
@@ -53,6 +54,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
       ),
       child: TextField(
+        controller: widget.controller, 
         focusNode: focusNode,
         obscureText: widget.obscureText ? isHidden : false,
         style: AppTextStyles.text16b,

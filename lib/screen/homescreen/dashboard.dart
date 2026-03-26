@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/cart%20and%20checkout/confirmorder.dart';
+import 'package:litshelf/screen/cart%20and%20checkout/cartpage.dart';
+
 import 'package:litshelf/screen/category/menu.dart';
 import 'package:litshelf/screen/profile/profile.dart';
 import 'package:litshelf/widget/_navItem.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'homepage.dart';
 
 
@@ -18,12 +22,31 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late int _currentIndex;
+  List<Map<String, dynamic>> cartItems = [];
+  Future<List<Map<String, dynamic>>> loadCart() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? cartString = prefs.getString('cart');
+
+  if (cartString != null) {
+    List decoded = jsonDecode(cartString);
+    return decoded.cast<Map<String, dynamic>>();
+  } else {
+    return [];
+  }
+}
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.selectedIndex;
+     loadCart().then((data) {
+    setState(() {
+      cartItems = data;
+    });
+  });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +55,8 @@ class _DashboardPageState extends State<DashboardPage> {
     List<Widget> screens = [
       const HomePage(),
       const Menu(),
-      const ConfirmOrderScreen(),
+      CartPage(cartItems: cartItems),
+   
       const Profile(),
     ];
 

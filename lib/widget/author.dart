@@ -1,61 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:litshelf/theme/text.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthorsWidget extends StatelessWidget {
-  final Future<List<dynamic>> booksFuture;
-  final Map<String, String> authorImages;
+  
 
-  const AuthorsWidget({
+  AuthorsWidget({
     super.key,
-    required this.booksFuture,
-    required this.authorImages,
+    
   });
+  final supabase = Supabase.instance.client;
+
+Future<List<dynamic>> fetchAuthors() async {
+  final response = await supabase
+      .from('authors')
+      .select('name, image');
+
+  return response;
+}
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Authors",
-          style: AppTextStyles.des18bb
-        ),
-         SizedBox(height:size.height*0.02),
-        FutureBuilder(
-          future: booksFuture,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return const SizedBox();
-
-            final books = snapshot.data!;
-
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: books.take(3).map((book) {
-                final info = book["volumeInfo"];
-                String author = (info["authors"] != null) ? info["authors"][0] : "Unknown";
-                String image = authorImages[author] ?? "https://via.placeholder.com/100";
-                return Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage(image),
+   return Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text(
+      "Authors",
+      style: AppTextStyles.des18bb,
+    ),
+    SizedBox(height: size.height * 0.02),
+    SizedBox(
+      height: size.height * 0.28, 
+      child: FutureBuilder(
+        future: fetchAuthors(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final authors = snapshot.data!;
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: authors.length,
+            itemBuilder: (context, index) {
+              final item = authors[index];
+              return Container(
+                margin: EdgeInsets.only(right: size.width * 0.08),
+                child: Column(
+                  children: [                 
+                    Container(
+                      width: size.width * 0.25,  
+                      height: size.width * 0.25,  
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: NetworkImage(item['image']),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                    SizedBox(height:size.height*0.02),
-                    Text(author,style: AppTextStyles.text14bb),
-                     Text(
-                      "Writer",
-                      style: AppTextStyles.text14g
+                    SizedBox(height: size.height * 0.01),               
+                    SizedBox(
+                      width: size.width * 0.25,
+                      child: Text(
+                        item['name'],
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style:AppTextStyles.text16b
+                      ),
                     ),
                   ],
-                );
-              }).toList(),
-            );
-          },
-        ),
-        SizedBox(height: size.height * 0.03),
-      ],
-    );
-  }
+                ),
+              );
+            },
+          );
+        },
+      ),
+    ),
+  ],
+);}
 }
