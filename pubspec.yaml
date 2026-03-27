@@ -30,17 +30,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.0
+  image_picker: ^1.1.1
+  permission_handler: ^12.0.1
+  provider: ^6.0.5
   shared_preferences: ^2.2.2
-  geocoding: ^2.1.1
+  geocoding: ^4.0.0
+  supabase_flutter: ^2.12.0 
+  cupertino_icons: ^1.0.8   # upgraded to latest stable
+   # upgraded to latest stable
+ 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+ 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_map: ^6.0.0
-  latlong2: ^0.9.0
+  
+ 
+  
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
