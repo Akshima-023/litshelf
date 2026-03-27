@@ -88,4 +88,9 @@ class AppTextStyles{
     fontWeight: .bold,
     color:Color.fromARGB(255, 137, 41, 228)
   );
+  static TextStyle text18bp = TextStyle(
+    fontSize: 18,
+    fontWeight: .bold,
+    color:Color.fromARGB(255, 137, 41, 228)
+  );
 }

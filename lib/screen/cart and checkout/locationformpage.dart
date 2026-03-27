@@ -59,7 +59,7 @@ void loadSavedData() async {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: size.height * 0.01),
 
             CustomFormField(label: "Phone", controller: phoneController),
             CustomFormField(label: "Name", controller: nameController),

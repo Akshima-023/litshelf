@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:litshelf/screen/homescreen/authorspage.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,9 +26,16 @@ Future<List<dynamic>> fetchAuthors() async {
    return Column(
   crossAxisAlignment: CrossAxisAlignment.start,
   children: [
-    Text(
-      "Authors",
-      style: AppTextStyles.des18bb,
+    GestureDetector(onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) =>  AuthorsPage()),
+    );
+  },
+      child: Text(
+        "Authors",
+        style: AppTextStyles.des18bb,
+      ),
     ),
     SizedBox(height: size.height * 0.02),
     SizedBox(
@@ -67,7 +75,7 @@ Future<List<dynamic>> fetchAuthors() async {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style:AppTextStyles.text16b
+                       
                       ),
                     ),
                   ],

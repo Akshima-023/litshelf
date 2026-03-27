@@ -1,90 +1,85 @@
 import 'package:flutter/material.dart';
-
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/vendorpage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class VendorsWidget extends StatelessWidget {
-  const VendorsWidget({super.key});
+   VendorsWidget({super.key});
+  final supabase = Supabase.instance.client;
+Future<List<dynamic>> fetchVendors() async {
+  final response = await supabase
+      .from('vendor_images')
+      .select('image');
 
+  return response;
+}
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: size.height * 0.02),
-         Text(
-          "Vendors",
-          style: AppTextStyles.des18bb
-        ),
-        SizedBox(height: size.height * 0.02),
-        SizedBox(
-          height: size.height * 0.18,
-          child: ListView(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    SizedBox(height: size.height * 0.02),
+
+   GestureDetector(
+  onTap: () {
+    // Navigate to Vendor Page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) =>  VendorsWidget()),
+    );
+  },
+  child: Text(
+    "Best Vendors",
+    style: AppTextStyles.des18bb,
+  ),
+),
+
+    SizedBox(height: size.height * 0.02),
+
+    FutureBuilder(
+      future: fetchVendors(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final vendors = snapshot.data!;
+
+        return SizedBox(
+          height: size.height * 0.12,
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            children: const [
-              VendorCard(name: "The Reading Nook", imageUrl: "https://picsum.photos/100?1"),
-              VendorCard(name: "Pages & Co.", imageUrl: "https://picsum.photos/100?2"),
-              VendorCard(name: "Book Haven", imageUrl: "https://picsum.photos/100?3"),
-              VendorCard(name: "LitCorner", imageUrl: "https://picsum.photos/100?4"),
-              VendorCard(name: "StoryTime Sellers", imageUrl: "https://picsum.photos/100?5"),
-            ],
+            itemCount: vendors.length,
+            itemBuilder: (context, index) {
+              final item = vendors[index];
+
+              return Container(
+                width: size.width * 0.3,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color.fromARGB(255, 238, 237, 237)
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    item['image'], 
+                    height: size.height*0.02,
+                    
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class VendorCard extends StatelessWidget {
-  final String name;
-  final String imageUrl;
-
-  const VendorCard({super.key, required this.name, required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-     final Size size = MediaQuery.of(context).size;
-    return  GestureDetector(
-   onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => VendorPage(
-        vendorName: name,
-        vendorImage: imageUrl,
-      ),
+        );
+      },
     ),
-  );
-},
-      child: Container(
-        width:  size.width * 0.25,
-        margin: const EdgeInsets.only(right: 12),
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                imageUrl,
-                height: size.height * 0.10,
-                width: size.width * 0.25,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(height: size.height * 0.01,),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    
-    );
-    
+  ],
+);
   }
-  
 }
+
+
+  

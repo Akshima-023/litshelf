@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/homescreen/homepage.dart';
+import 'package:litshelf/screen/homescreen/dashboard.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/widget/purplebutton.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,6 +14,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
+    TextEditingController nameController = TextEditingController();
     final Size size = MediaQuery.of(context).size;
    return Scaffold(
       backgroundColor: Colors.white,
@@ -40,16 +42,21 @@ class _RegisterState extends State<Register> {
               ),
               SizedBox(height: size.height * 0.05),
               PurpleButton(
-              text: "Get Started",
-              onTap: () {
-               Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => HomePage()
-                ),
-                );
-              }
-            ),
+  text: "Get Started",
+  onTap: () async {
+    final prefs = await SharedPreferences.getInstance();
+
+    
+    await prefs.setString("user_name", nameController.text);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DashboardPage()
+      ),
+    );
+  },
+),
           ]
         )        
       ),

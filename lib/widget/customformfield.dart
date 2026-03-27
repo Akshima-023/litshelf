@@ -15,6 +15,7 @@ class CustomFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final Size size = MediaQuery.of(context).size;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -24,7 +25,7 @@ class CustomFormField extends StatelessWidget {
           style: AppTextStyles.text16bb
         ),
 
-        const SizedBox(height: 8),
+        SizedBox(height:size.height*0.01),
 
       
         Container(
@@ -42,7 +43,7 @@ class CustomFormField extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 18),
+         SizedBox(height: size.height*0.01),
       ],
     );
   }

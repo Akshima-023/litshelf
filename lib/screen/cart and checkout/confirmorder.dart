@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:litshelf/screen/cart%20and%20checkout/deliverydate.dart';
+import 'package:litshelf/screen/cart%20and%20checkout/orderdetailspage.dart';
 import 'package:litshelf/screen/cart%20and%20checkout/showpaymentsheet.dart';
 import 'package:litshelf/screen/profile/address.dart';
 import 'package:litshelf/theme/text.dart';
@@ -11,7 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:litshelf/screen/homescreen/notification.dart';
 
 class ConfirmOrderScreen extends StatefulWidget {
-  const ConfirmOrderScreen({super.key});
+  const ConfirmOrderScreen({super.key,  required this.book});
+  final Map book;
+  
 
   @override
   State<ConfirmOrderScreen> createState() => _ConfirmOrderScreenState();
@@ -20,22 +23,31 @@ class ConfirmOrderScreen extends StatefulWidget {
 class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
   double price = 0;
 double shipping = 2;
+
 double get total => price + shipping;
   String titleAddress = "";
 String subAddress = "";
 String selectedPayment = "Choose payment method"; 
 Future<void> loadAddress() async {
   final prefs = await SharedPreferences.getInstance();
+
+  // get selected type (home / office)
+  String type = prefs.getString("selected_type") ?? "home";
+
   setState(() {
-    titleAddress = prefs.getString("titleAddress") ?? "No address";
-    subAddress = prefs.getString("subAddress") ?? "";
+    titleAddress =
+        prefs.getString("${type}_street") ?? "No address";
+    subAddress =
+        prefs.getString("${type}_sub") ?? "";
   });
 }
+
  
   @override
 void initState() {
   super.initState();
   loadAddress();
+    price = (widget.book["price"] ?? 0).toDouble();
 }
 void selectBook(Map book) {
   setState(() {
@@ -114,13 +126,12 @@ void selectBook(Map book) {
         builder: (context) => const Address()
       ),
     );
+    loadAddress();
   },child: Icon(Icons.arrow_forward_ios, size: 16)),
       ],
-       ),
-    
+       ),    
        TextButton(
-      onPressed: () {
-         
+      onPressed: () {         
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -158,13 +169,7 @@ SummaryRow(
   title: "Total Payment",
   value: "\$${total.toStringAsFixed(2)}",
 ),
-const Divider(),
-Row(
-  children: [
-    Text("See detail",style: AppTextStyles.text16p,),
-    const Icon(Icons.arrow_forward_ios, size: 16,color: Colors.purple,),
-  ],
-),
+
      ],
    ),
       ),SizedBox(height: size.height*0.03,),
@@ -223,7 +228,14 @@ DateTimeCard(
 
       
    SizedBox(height: size.height*0.03),             
-       PurpleButton(text: "order", onTap: (){})
+       PurpleButton(text: "order", onTap: (){
+        Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const OrderDetailsPage()
+      ),
+    );
+       })
        
       ])])))));
     }

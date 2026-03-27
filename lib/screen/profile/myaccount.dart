@@ -227,7 +227,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
                     await prefs.setString(
                         "user_password", _passwordController.text);
 
-                    // ✅ GO BACK TO PROFILE
                     Navigator.pop(context);
                   },
                 ),

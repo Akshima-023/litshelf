@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:litshelf/theme/text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Favorites"),
@@ -74,12 +76,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     item['image'],
-                    width: 100,       
-                    height: 120,      
+                    width: size.width*0.3,       
+                    height: size.height*0.15,      
                     fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(width: 16),
+                 SizedBox(width:size.width*0.02),
 
                 // 📄 DETAILS
                 Expanded(
@@ -88,10 +90,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     children: [
                       Text(
                         item['name'],
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
+                        style: AppTextStyles.text14bb),
+                       SizedBox(height: size.height*0.01),
                       Text("₹${item['price']}"),
                     ],
                   ),

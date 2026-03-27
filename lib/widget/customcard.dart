@@ -12,6 +12,7 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final Size size = MediaQuery.of(context).size;
     return Container(
       padding: padding ?? const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -19,7 +20,7 @@ class CustomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
         color: Colors.grey, 
-        width: 1,
+        width: size.width*0.002,
       ),
       ),
       child: child,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:litshelf/theme/text.dart';
 
 class ProductDetailBottomBar extends StatelessWidget {
   final double price;
@@ -12,6 +13,7 @@ class ProductDetailBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final size = MediaQuery.of(context).size;
     return BottomAppBar(
       elevation: 10,
       child: Padding(
@@ -25,20 +27,14 @@ class ProductDetailBottomBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                 Text(
                   "Price",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: AppTextStyles.text14g
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: size.height*0.02),
                 Text(
                   "\$${price.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.des20bw
                 ),
               ],
             ),

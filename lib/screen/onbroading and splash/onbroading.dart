@@ -19,23 +19,16 @@ class _OnbroadingState extends State<Onbroading> {
 
   @override
   Widget build(BuildContext context) {
-
     final Size size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 20,left: 20,right: 20),
-
           child: Column(
             children: [
-
               SizedBox(height: size.height * 0.05),
-
-            
-              Row(
+                Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   TextButton(
@@ -51,11 +44,7 @@ class _OnbroadingState extends State<Onbroading> {
                     ),
                   )
                 ],
-              ),
-
-              
-
-             
+              ),                        
               SizedBox(
   height: size.height * 0.50,
                 child: PageView(
