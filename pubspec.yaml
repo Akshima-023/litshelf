@@ -38,7 +38,12 @@ dependencies:
   shared_preferences: ^2.2.2
   geocoding: ^4.0.0
   supabase_flutter: ^2.12.0 
-  cupertino_icons: ^1.0.8   # upgraded to latest stable
+  cupertino_icons: ^1.0.8  
+  url_launcher: ^6.2.5 
+  carousel_slider: ^4.2.1
+  shimmer: ^3.0.0
+
+  # upgraded to latest stable
    # upgraded to latest stable
  
   # The following adds the Cupertino Icons font to your application.
@@ -48,7 +53,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+  flutter_launcher_icons: ^0.13.1
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/book.png" 
  
   
   # The "flutter_lints" package below contains a set of recommended lints to

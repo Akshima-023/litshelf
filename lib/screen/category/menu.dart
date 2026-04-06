@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart' hide Notification;
+import 'package:litshelf/screen/homescreen/productbottomsheet.dart';
+import 'package:litshelf/widget/categorytext.dart';
+import 'package:litshelf/widget/skeletongrid.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/screen/homescreen/search.dart';
 import 'package:litshelf/screen/homescreen/notification.dart';
+
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -14,45 +18,46 @@ class Menu extends StatefulWidget {
 class _MenuState extends State<Menu> {
   String selectedCategory = "All";
   List<dynamic> books = [];
+  bool isLoading = true;
+
   final supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
-    fetchBooks(); // Load initially
+    fetchBooks();
   }
 
-  // 🔹 FETCH BOOKS FROM SUPABASE
   Future<void> fetchBooks() async {
+    setState(() {
+      isLoading = true;
+    });
+
     var query = supabase.from('book_category').select();
 
-    // Filter by category type
     if (selectedCategory == "Novels") {
-      query = query.eq('type', 'novel');
+      query = query.ilike('type', 'novel');
     } else if (selectedCategory == "Self-Love") {
-      query = query.eq('type', 'selflove');
+      query = query.ilike('type', 'self-love');
     } else if (selectedCategory == "Science") {
-      query = query.eq('type', 'science');
+      query = query.ilike('type', 'science');
+    } else if (selectedCategory == "Romantic") {
+      query = query.ilike('type', 'romantic');
     }
 
     final response = await query;
 
     setState(() {
       books = response;
+      isLoading = false;
     });
   }
 
-  // 🔹 CATEGORY SELECTION
   void changeCategory(String category) {
     setState(() {
       selectedCategory = category;
     });
     fetchBooks();
-  }
-
-  // 🔹 Build full public URL for Supabase storage
-  String getPublicImageUrl(String filename) {
-    return 'https://wtatapphrkkgcaykqehb.supabase.co/storage/v1/object/public/topofweek/$filename';
   }
 
   @override
@@ -67,7 +72,7 @@ class _MenuState extends State<Menu> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🔹 HEADER
+              /// TOP BAR
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -88,7 +93,7 @@ class _MenuState extends State<Menu> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const Notification(),
+                          builder: (context) => NotificationPage(),
                         ),
                       );
                     },
@@ -99,108 +104,120 @@ class _MenuState extends State<Menu> {
 
               SizedBox(height: size.height * 0.05),
 
-              // 🔹 CATEGORY ROW
+              /// CATEGORY ROW
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  InkWell(
-                    onTap: () => changeCategory("All"),
-                    child: Text(
-                      "All",
-                      style: AppTextStyles.text16b.copyWith(
-                        color: selectedCategory == "All"
-                            ? Colors.black
-                            : Colors.grey,
-                      ),
-                    ),
+                  CategoryText(
+                    title: "All",
+                    selectedCategory: selectedCategory,
+                    onTap: changeCategory,
                   ),
-                  InkWell(
-                    onTap: () => changeCategory("Novels"),
-                    child: Text(
-                      "Novels",
-                      style: AppTextStyles.text16b.copyWith(
-                        color: selectedCategory == "Novels"
-                            ? Colors.black
-                            : Colors.grey,
-                      ),
-                    ),
+                  CategoryText(
+                    title: "Novels",
+                    selectedCategory: selectedCategory,
+                    onTap: changeCategory,
                   ),
-                  InkWell(
-                    onTap: () => changeCategory("Self-Love"),
-                    child: Text(
-                      "Self-Love",
-                      style: AppTextStyles.text16b.copyWith(
-                        color: selectedCategory == "Self-Love"
-                            ? Colors.black
-                            : Colors.grey,
-                      ),
-                    ),
+                  CategoryText(
+                    title: "Self-Love",
+                    selectedCategory: selectedCategory,
+                    onTap: changeCategory,
                   ),
-                  InkWell(
-                    onTap: () => changeCategory("Science"),
-                    child: Text(
-                      "Science",
-                      style: AppTextStyles.text16b.copyWith(
-                        color: selectedCategory == "Science"
-                            ? Colors.black
-                            : Colors.grey,
-                      ),
-                    ),
+                  CategoryText(
+                    title: "Science",
+                    selectedCategory: selectedCategory,
+                    onTap: changeCategory,
+                  ),
+                  CategoryText(
+                    title: "Romantic",
+                    selectedCategory: selectedCategory,
+                    onTap: changeCategory,
                   ),
                 ],
               ),
 
               SizedBox(height: size.height * 0.03),
 
-              // 🔹 BOOK GRID
+              /// GRID
               Expanded(
-                child: books.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
-                        itemCount: books.length,
-                        itemBuilder: (context, index) {
-                          final item = books[index];
+                child: isLoading
+                    ? const SkeletonGrid()
+                    : books.isEmpty
+                        ? const Center(child: Text("No books found"))
+                        : GridView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.7,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
+                            itemCount: books.length,
+                            itemBuilder: (context, index) {
+                              final item = books[index];
+                              final imageUrl = item['image_url'] ?? '';
 
-                          final imageUrl =
-                              getPublicImageUrl(item['image']); // Construct full URL
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 120,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  image: DecorationImage(
-                                    image: NetworkImage(imageUrl),
-                                    fit: BoxFit.cover,
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20),
+                                          ),
+                                        ),
+                                        builder: (context) {
+                                          return ProductBottomSheet(
+                                            productId: null,
+                                            bookId: item['id'],
+                                            name: item['name'],
+                                            image: item['image_url'],
+                                            rating: 5,
+                                            ratingCount: 100,
+                                            price: (item['price'] ?? 0).toDouble(),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Container(
+                                      height: size.height * 0.2,
+                                      width: size.width * 0.5,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        image: DecorationImage(
+                                          image: imageUrl.isNotEmpty
+                                              ? NetworkImage(imageUrl)
+                                              : const AssetImage(
+                                                      'assets/placeholder.png')
+                                                  as ImageProvider,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                item['name'],
-                                style: AppTextStyles.text16bb,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                "₹${item['price']}",
-                                style: AppTextStyles.text14g,
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+
+                                  SizedBox(height: size.height * 0.02),
+
+                                  Text(
+                                    item['name'] ?? '',
+                                    style: AppTextStyles.text16bb,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  Text(
+                                    "₹${item['price'] ?? ''}",
+                                    style: AppTextStyles.text14pb,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
               ),
             ],
           ),

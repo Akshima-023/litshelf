@@ -102,7 +102,7 @@ class _OnbroadingState extends State<Onbroading> {
 
               SizedBox(height: size.height * 0.06),
 PurpleButton(
-  text: currentIndex == 0 ? "Continue" : "Get Started",
+  text: currentIndex == 2 ? "Get Started" : "Continue",
   onTap: () {
     if (currentIndex < 2) {
       _controller.nextPage(
@@ -110,7 +110,7 @@ PurpleButton(
         curve: Curves.easeIn,
       );
     } else {
-       Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const Login(),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:litshelf/screen/provider/authorbooksprovider.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+
 
 class AuthorDetailPage extends StatefulWidget {
   final Map<String, dynamic> author;
@@ -12,80 +14,67 @@ class AuthorDetailPage extends StatefulWidget {
 }
 
 class _AuthorDetailPageState extends State<AuthorDetailPage> {
-  final supabase = Supabase.instance.client;
-
-  late Future<List<Map<String, dynamic>>> booksFuture;
-
   @override
   void initState() {
     super.initState();
-    booksFuture = fetchBooks();
-  }
 
-  Future<List<Map<String, dynamic>>> fetchBooks() async {
-    final data = await supabase
-        .from('books')
-        .select()
-        .eq('author_id', widget.author['id']);
-        print("AUTHOR ID: ${widget.author['id']}");
-
-    return List<Map<String, dynamic>>.from(data);
+    Future.microtask(() {
+      Provider.of<AuthorBooksProvider>(context, listen: false)
+          .fetchBooks(widget.author['id']);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final author = widget.author;
     final Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Authors"),
+        title:  Text("Authors",style: AppTextStyles.des24bb,),
         centerTitle: true,
+        
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
-            // IMAGE
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage(author['image_url'] ?? ''),
             ),
 
-             SizedBox(height: size.height*0.01),
+            SizedBox(height: size.height * 0.01),
 
-            const Text("Novelist", style: TextStyle(color: Colors.grey)),
+             Text("Novelist", style: AppTextStyles.text16g),
 
-            SizedBox(height: size.height*0.01),
+            SizedBox(height: size.height * 0.0),
 
             Text(
               author['name'] ?? '',
-              style:AppTextStyles.des20bw
+              style: AppTextStyles.des20bw,
             ),
 
-            SizedBox(height: size.height*0.04),
+            SizedBox(height: size.height * 0.04),
 
-            // ABOUT
-             Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: Text("About",
-                  style:AppTextStyles.des20bw),
+              child: Text("About", style: AppTextStyles.des18bb),
             ),
 
-             SizedBox(height: size.height*0.02),
+            SizedBox(height: size.height * 0.02),
 
-            Text(author['description'] ?? '',style: AppTextStyles.text16b,),
+            Text(
+              author['description'] ?? '',
+              style: AppTextStyles.text16g,
+            ),
 
-            SizedBox(height: size.height*0.02),
+            SizedBox(height: size.height * 0.02),
 
-            // PRODUCTS
-             
-
-            
-
+            // BOOKS SECTION
            
+
             ],
         ),
       ),

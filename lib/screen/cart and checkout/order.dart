@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:litshelf/screen/cart%20and%20checkout/cartpage.dart';
+import 'package:litshelf/screen/provider/cartprovider.dart';
+import 'package:litshelf/screen/provider/feedbackprovider.dart';
+import 'package:provider/provider.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/widget/purplebutton.dart';
 
 class OrderReceivedPage extends StatelessWidget {
-  const OrderReceivedPage({super.key});
+  final String orderId;
+  const OrderReceivedPage({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final feedbackProvider = Provider.of<FeedbackProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -15,80 +21,87 @@ class OrderReceivedPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [ Container(
-                height:size.height*0.05 ,
-                width: size.width*0.1,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F2FF),
+            children: [
+              /// ICON
+              Container(
+                height: size.height * 0.08,
+                width: size.height * 0.08,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF5F2FF),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.inventory_2_outlined,
-                  size: 60,
+                  size: 40,
                   color: Color(0xFF6A5AE0),
                 ),
               ),
-
-               SizedBox(height: size.height*0.02),
-
-              // Title
-               Text(
-                "You Received The Order!",
-                style: AppTextStyles.des20bw
-              ),
-
-              SizedBox(height: size.height*0.02),
-
-              // Order ID
-               Text(
-                "Order #2930541",
-                style: AppTextStyles.text14g
-              ),
-
-              SizedBox(height: size.height*0.02),
-
-              // Feedback Title
-               Text(
-                "Tell us your feedback 👋",
-                style: AppTextStyles.text18bp
-              ),
-
-              SizedBox(height: size.height*0.01),
-
-              // Description
-               Text(
-                "Lorem ipsum dolor sit amet\nconsectetur. Dignissim magna vitae.",
-                textAlign: TextAlign.center,
-                style: AppTextStyles.text14g
-              ),
-
-               SizedBox(height: size.height*0.02),
-
-              // ⭐ Rating Stars
+              SizedBox(height: size.height * 0.02),
+              Text("You Received The Order!",
+                  style: AppTextStyles.des20bw),
+              SizedBox(height: size.height * 0.01),
+              Text("Order #$orderId", style: AppTextStyles.text14g),
+              SizedBox(height: size.height * 0.03),
+              Text("Tell us your feedback 👋",
+                  style: AppTextStyles.text18bp),
+              SizedBox(height: size.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  5,
-                  (index) => Icon(
-                    index < 4 ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 32,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    onPressed: () {
+                      feedbackProvider.setRating(index + 1);
+                    },
+                    icon: Icon(
+                      index < feedbackProvider.rating
+                          ? Icons.star
+                          : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                  );
+                }),
+              ),
+
+              SizedBox(height: size.height * 0.02),
+              TextField(
+                onChanged: (value) {
+                  feedbackProvider.setFeedback(value);
+                },
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: "Write something for us...",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
 
-                SizedBox(height: size.height*0.02),
+              SizedBox(height: size.height * 0.03),
 
-              // Write feedback
-               Text(
-                "Write something for us!",
-                style: AppTextStyles.text14b
-              ),
+              /// BUTTON
+             PurpleButton(
+  text: "Done",
+  onTap: () {
+    final rating = feedbackProvider.rating;
+    final feedback = feedbackProvider.feedback;
 
-               SizedBox(height: size.height*0.02),
+    print("Rating: $rating");
+    print("Feedback: $feedback");
 
-              PurpleButton(text: "Done", onTap: (){})
-              ],
+    Provider.of<CartProvider>(context, listen: false).clearCart();
+    feedbackProvider.clear();
+
+   Navigator.push(
+  context,
+  MaterialPageRoute(
+   
+    builder: (context) => const CartPage(),
+  ),
+);
+  },
+),
+            ],
           ),
         ),
       ),

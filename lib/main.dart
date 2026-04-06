@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:litshelf/screen/onbroading%20and%20splash/splash.dart';
-import 'package:litshelf/screen/signin%20and%20signup/authprovider.dart';
+import 'package:litshelf/screen/provider/authorbooksprovider.dart';
+import 'package:litshelf/screen/provider/authorsprovider.dart';
+import 'package:litshelf/screen/provider/authprovider.dart';
+import 'package:litshelf/screen/provider/cartprovider.dart';
+import 'package:litshelf/screen/provider/favourite.dart';
+import 'package:litshelf/screen/provider/feedbackprovider.dart';
+import 'package:litshelf/screen/provider/forgetpasswordprovider.dart';
+import 'package:litshelf/screen/provider/homeprovider.dart';
+import 'package:litshelf/screen/provider/locationprovider.dart';
+import 'package:litshelf/screen/provider/orderprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,6 +26,16 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => AuthorBooksProvider()),
+        ChangeNotifierProvider(create: (_) => AuthorsProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider(),),
+       ChangeNotifierProvider(create: (_) => FeedbackProvider(),
+        ),
+         ChangeNotifierProvider(create: (_) => Forgetpasswordprovider()),
+          ChangeNotifierProvider(create: (_) => OrderProvider()),
+           ChangeNotifierProvider(create: (_) => LocationProvider()),
       ],
       child: MyApp(),
     ),
@@ -24,9 +43,11 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+    const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: SplashPage()
     );
   }

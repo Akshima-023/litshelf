@@ -4,9 +4,14 @@ import 'package:litshelf/widget/datechip.dart';
 import 'package:litshelf/widget/purplebutton.dart';
 import 'package:litshelf/widget/timechip.dart';
 
-
 class DeliveryDate extends StatefulWidget {
-  const DeliveryDate({super.key});
+  final String name;
+  final String image;
+  const DeliveryDate({
+    super.key,
+    required this.name,
+    required this.image,
+  });
 
   @override
   State<DeliveryDate> createState() => _DeliveryDateState();
@@ -16,12 +21,11 @@ class _DeliveryDateState extends State<DeliveryDate> {
   String selectedDateType = "Today";
   String selectedTime = "Between\n10PM - 11PM";
   DateTime selectedDate = DateTime.now();
-
-  // 🔹 Format date like "12 Jan"
+  bool isDateSelected = true;
   String formatDate(DateTime date) {
     const months = [
-      "Jan","Feb","Mar","Apr","May","Jun",
-      "Jul","Aug","Sep","Oct","Nov","Dec"
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
     return "${date.day} ${months[date.month - 1]}";
   }
@@ -39,27 +43,23 @@ class _DeliveryDateState extends State<DeliveryDate> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
+          children: [         
             Center(
               child: Container(
-                height: size.height*0.005,
-                width:size.width * 0.1 ,
+                height: size.height * 0.005,
+                width: size.width * 0.1,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-            const SizedBox(height: 20),           
-            Text(
-              "Delivery date",
-              style: AppTextStyles.text16bb
-            ),
-            SizedBox(height: size.height*0.01),            
+            const SizedBox(height: 20),
+            Text("Delivery date", style: AppTextStyles.text16bb),
+            SizedBox(height: size.height * 0.01),
             Wrap(
               spacing: 10,
-              children: [               
+              children: [
                 DateChip(
                   text: "Today\n${formatDate(DateTime.now())}",
                   isSelected: selectedDateType == "Today",
@@ -67,9 +67,10 @@ class _DeliveryDateState extends State<DeliveryDate> {
                     setState(() {
                       selectedDateType = "Today";
                       selectedDate = DateTime.now();
+                      isDateSelected = true;
                     });
                   },
-                ),               
+                ),
                 DateChip(
                   text:
                       "Tomorrow\n${formatDate(DateTime.now().add(const Duration(days: 1)))}",
@@ -79,9 +80,10 @@ class _DeliveryDateState extends State<DeliveryDate> {
                       selectedDateType = "Tomorrow";
                       selectedDate =
                           DateTime.now().add(const Duration(days: 1));
+                      isDateSelected = true;
                     });
                   },
-                ),               
+                ),
                 DateChip(
                   text: selectedDateType == "Pick"
                       ? "Picked\n${formatDate(selectedDate)}"
@@ -100,18 +102,17 @@ class _DeliveryDateState extends State<DeliveryDate> {
                       setState(() {
                         selectedDateType = "Pick";
                         selectedDate = picked;
+                        isDateSelected = true;
                       });
                     }
                   },
                 ),
               ],
             ),
-             SizedBox(height:  size.height*0.03),          
-            Text(
-              "Delivery time",
-              style: AppTextStyles.text16bb
-            ),
-             SizedBox(height:  size.height*0.01),           
+            SizedBox(height: size.height * 0.03),
+            Text("Delivery time", style: AppTextStyles.text16bb),
+            SizedBox(height: size.height * 0.01),
+            /// TIME OPTIONS
             Wrap(
               spacing: 10,
               children: [
@@ -135,15 +136,24 @@ class _DeliveryDateState extends State<DeliveryDate> {
                 ),
               ],
             ),
-
-           SizedBox(height:  size.height*0.04),
-PurpleButton(
-  text: "Confirm",
-  onTap: () {
-    Navigator.pop(context); 
-  },
-)
-            ],
+            SizedBox(height: size.height * 0.04),
+            PurpleButton(
+              text: "Confirm",
+              onTap: () {
+                if (!isDateSelected) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Please select a date")),
+                  );
+                  return;
+                }
+                Navigator.of(context).pop({
+                  "date": selectedDate,
+                  "time": selectedTime,
+                });
+              },
+            ),
+          ],
         ),
       ),
     );

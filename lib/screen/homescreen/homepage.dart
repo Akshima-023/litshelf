@@ -1,39 +1,39 @@
-import 'package:flutter/material.dart' hide Notification;
-
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:litshelf/screen/homescreen/notification.dart';
 import 'package:litshelf/screen/homescreen/search.dart';
-
+import 'package:litshelf/screen/provider/homeprovider.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/author.dart' show AuthorsWidget;
-
+import 'package:litshelf/widget/author.dart';
+import 'package:litshelf/widget/promo.dart';
 import 'package:litshelf/widget/topofweek.dart';
 import 'package:litshelf/widget/vendors.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-  
-  
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
+
 class _HomePageState extends State<HomePage> {
- final supabase = Supabase.instance.client;
+  @override
+  void initState() {
+    super.initState();
 
-Future<List<dynamic>> fetchBooks() async {
-  return await supabase
-      .from('book_details')
-      .select('id, book_image, book_name');
-}
-
-  
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<HomeProvider>(context, listen: false);
+      provider.fetchBooks();
+      provider.fetchPromotion();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    
-    final Size size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -42,70 +42,87 @@ Future<List<dynamic>> fetchBooks() async {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [            
+              children: [
+                /// HEADER
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: () {Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => const Search()
-                    ),
-                    );
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const Search()),
+                        );
                       },
                       icon: const Icon(Icons.search_outlined),
                     ),
                     Text("Home", style: AppTextStyles.des18bb),
                     IconButton(
                       onPressed: () {
-                       Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => const Notification()
-                    ),
-                    );
-                   },                     
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => NotificationPage()),
+                        );
+                      },
                       icon: const Icon(Icons.notifications_outlined),
                     ),
                   ],
                 ),
-                SizedBox(height: size.height * 0.02),                
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Special Offer"),
-                             SizedBox(height:size.height*0.001),
-                            const Text("Discount 25%"),
-                             SizedBox(height: size.height*0.001),
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: const Text("Order Now"),
-                            )
-                          ],
+
+                SizedBox(height: size.height * 0.02),
+
+                /// PROMO SECTION
+                Consumer<HomeProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoadingPromo &&
+                        provider.promotionImages.isEmpty) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          height: size.height * 0.2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.grey[300],
+                          ),
                         ),
-                      ),
-                     
-                      
-                    ],
-                  ),
+                      );
+                    }
+
+                    if (provider.promotionImages.isEmpty) {
+                      return const Center(
+                        child: Text("No promotions available"),
+                      );
+                    }
+
+                    /// Use your PromoCarousel (with dots + autoplay inside it)
+                    return PromoSection(
+                      images: provider.promotionImages,
+                    );
+                  },
                 ),
-               SizedBox(height: size.height * 0.03),
-                TopOfWeekWidget( booksFuture: Future.value([])),
-               SizedBox(height: size.height * 0.0),                      
-             VendorsWidget(),
-              SizedBox(height: size.height * 0.02),   
-             AuthorsWidget(),
-              SizedBox(height: size.height * 0.03),
+
+                SizedBox(height: size.height * 0.03),
+
+                /// TOP OF WEEK
+                Consumer<HomeProvider>(
+                  builder: (context, provider, child) {
+                    return TopOfWeekWidget(
+                      booksFuture: Future.value(provider.books),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                 VendorsWidget(),
+
+                SizedBox(height: size.height * 0.02),
+
+                 AuthorsWidget(),
+
+                SizedBox(height: size.height * 0.03),
               ],
             ),
           ),
@@ -113,4 +130,4 @@ Future<List<dynamic>> fetchBooks() async {
       ),
     );
   }
- }
+}

@@ -1,10 +1,15 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:litshelf/screen/cart%20and%20checkout/cartpage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:litshelf/widget/actionbutton.dart';
 import 'package:litshelf/theme/text.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductBottomSheet extends StatefulWidget {
+  final String? productId; 
+  final int? bookId;       
+
   final String name;
   final String image;
   final int rating;
@@ -13,6 +18,8 @@ class ProductBottomSheet extends StatefulWidget {
 
   const ProductBottomSheet({
     super.key,
+    this.productId,
+    this.bookId,
     required this.name,
     required this.image,
     required this.rating,
@@ -25,264 +32,308 @@ class ProductBottomSheet extends StatefulWidget {
 }
 
 class _ProductBottomSheetState extends State<ProductBottomSheet> {
+  final supabase = Supabase.instance.client;
+String activeButton = ""; 
   bool isLiked = false;
   int quantity = 1;
-  String activeButton = "";
   String selectedAction = "";
   List<Map<String, dynamic>> cartItems = [];
 
   @override
   void initState() {
     super.initState();
-    _loadLikedState();
+    checkFavorite();
     _loadCart();
+  }
+
+  String get column =>
+      widget.productId != null ? 'product_id' : 'book_id';
+  dynamic get value =>
+      widget.productId ?? widget.bookId;
+
+
+  Future<void> checkFavorite() async {
+    try {
+      final response = await supabase
+          .from('favorites')
+          .select('id')
+          .eq(column, value)
+          .maybeSingle();
+
+      if (mounted) {
+        setState(() {
+          isLiked = response != null;
+        });
+      }
+    } catch (e) {
+      print("Check favorite error: $e");
+    }
+  }
+
+  Future<void> toggleFavorite() async {
+    try {
+      final existing = await supabase
+          .from('favorites')
+          .select('id')
+          .eq(column, value)
+          .maybeSingle();
+
+      if (existing != null) {
+        await supabase
+            .from('favorites')
+            .delete()
+            .eq(column, value);
+
+        setState(() => isLiked = false);
+        showBottomToast("Removed from Favorites");
+      } else {
+        await supabase.from('favorites').insert(
+          widget.productId != null
+              ? {'product_id': widget.productId}
+              : {'book_id': widget.bookId},
+        );
+
+        setState(() => isLiked = true);
+        showBottomToast("Added to Favorites");
+      }
+    } catch (e) {
+      print("Favorite toggle error: $e");
+      showBottomToast("Error updating favorite");
+    }
+  }
+
+  void showBottomToast(String message) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 20,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(const Duration(seconds: 1), () {
+      overlayEntry.remove();
+    });
   }
 
   Future<void> _loadCart() async {
     final prefs = await SharedPreferences.getInstance();
     String? cartString = prefs.getString('cart');
+
     if (cartString != null) {
       List decoded = jsonDecode(cartString);
-      setState(() {
-        cartItems = decoded.cast<Map<String, dynamic>>();
-      });
+      if (mounted) {
+        setState(() {
+          cartItems = decoded.cast<Map<String, dynamic>>();
+        });
+      }
     }
-  }
-
-  Future<void> _saveCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    String cartString = jsonEncode(cartItems);
-    await prefs.setString('cart', cartString);
-  }
-
-  void _loadLikedState() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isLiked = prefs.getBool('liked_${widget.image}') ?? false;
-    });
-  }
-
-  void _saveLikedState() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('liked_${widget.image}', isLiked);
   }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
           left: 20,
           right: 20,
           top: 20,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+          bottom: MediaQuery.of(context).viewInsets.bottom +70 ,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMAGE
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  widget.image,
-                  height: 300,
-                  width: 300,
+                  widget.image.isNotEmpty
+                      ? widget.image
+                      : 'https://via.placeholder.com/150',
+                  height: size.height * 0.30,
+                  width: size.width * 0.85,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
+
             SizedBox(height: size.height * 0.02),
 
-            // TITLE & LIKE
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    widget.name,
-                    style: AppTextStyles.des20bw,
-                  ),
+                  child: Text(widget.name,
+                      style: AppTextStyles.des20bw),
                 ),
                 GestureDetector(
-  onTap: () async {
-    setState(() {
-      isLiked = !isLiked; // toggle favorite
-    });
-
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('liked_${widget.image}', isLiked);
-
-    // Load current favorites
-    List<Map<String, dynamic>> favorites = [];
-    String? favString = prefs.getString('favorites');
-    if (favString != null) {
-      List decoded = jsonDecode(favString);
-      favorites = decoded.cast<Map<String, dynamic>>();
-    }
-
-    if (isLiked) {
-      // Add item to favorites if not already added
-      if (!favorites.any((item) => item['image'] == widget.image)) {
-        favorites.add({
-          'name': widget.name,
-          'image': widget.image,
-          'price': widget.price,
-        });
-      }
-    } else {
-      // Remove item from favorites
-      favorites.removeWhere((item) => item['image'] == widget.image);
-    }
-
-    // Save updated favorites
-    await prefs.setString('favorites', jsonEncode(favorites));
-
-    // Optional: show a small snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isLiked
-            ? "Added to Favorites"
-            : "Removed from Favorites"),
-        duration: const Duration(seconds: 1),
-      ),
-    );
-  },
-  child: Icon(
-    isLiked ? Icons.favorite : Icons.favorite_border,
-    color: Colors.purple,
-    size: 28,
-  ),
-),
+                  onTap: toggleFavorite,
+                  child: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: Colors.purple,
+                    size: 28,
+                  ),
+                ),
               ],
             ),
+
             SizedBox(height: size.height * 0.02),
 
-            // DESCRIPTION
-            const Text(
-              "A long fictional story that explores characters, emotions, and experiences through engaging storytelling. It takes readers on a journey through different worlds, relationships, and ideas.",
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-            ),
+            Text("A captivating story that takes readers on an emotional journey through compelling characters, unexpected twists, and meaningful life lessons. Perfect for readers who enjoy immersive storytelling and rich narratives",
+            style: AppTextStyles.text16g,),
+
             SizedBox(height: size.height * 0.04),
 
-            // REVIEW
-            Text("Review", style: AppTextStyles.des18bb),
-            SizedBox(height: size.height * 0.01),
+            Text("Review", style: AppTextStyles.text16bb),
+
             Row(
               children: [
                 for (int i = 1; i <= 5; i++)
                   Icon(
                     i <= widget.rating ? Icons.star : Icons.star_border,
                     color: Colors.amber,
-                    size: 26,
                   ),
-                SizedBox(width: size.width * 0.04),
-                Text(
-                  "(${widget.ratingCount} reviews)",
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
+                SizedBox(width: size.width * 0.02),
+                Text("(${widget.ratingCount} reviews)"),
               ],
             ),
+
             SizedBox(height: size.height * 0.04),
 
-            // QUANTITY + PRICE
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    // MINUS
-                    GestureDetector(
-                      onTap: () {
-                        if (quantity > 1) {
-                          setState(() {
-                            quantity--;
-                            activeButton = "minus";
-                          });
-                        }
-                      },
-                      child: Container(
-                        height: size.height * 0.04,
-                        width: size.width * 0.1,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: activeButton == "minus"
-                              ? Colors.purple
-                              : Colors.grey[300],
-                        ),
-                        child: Icon(
-                          Icons.remove,
-                          color: activeButton == "minus" ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: size.width * 0.02),
+ Row(
+  children: [
+    // 🔻 MINUS
+    GestureDetector(
+      onTap: () {
+        if (quantity > 1) {
+          setState(() {
+            quantity--;
+            activeButton = "minus";
+          });
 
-                    // QUANTITY NUMBER
-                    Text(quantity.toString(), style: AppTextStyles.text16p),
-                    SizedBox(width: size.width * 0.02),
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              setState(() => activeButton = "");
+            }
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: activeButton == "minus"
+              ? Colors.purple
+              : Colors.grey.shade300,
+        ),
+        child: Icon(
+          Icons.remove,
+          color: activeButton == "minus"
+              ? Colors.white
+              : Colors.black,
+        ),
+      ),
+    ),
 
-                    // PLUS
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          quantity++;
-                          activeButton = "plus";
-                        });
-                      },
-                      child: Container(
-                        height: size.height * 0.04,
-                        width: size.width * 0.1,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: activeButton == "plus"
-                              ? Colors.purple
-                              : Colors.grey[300],
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          color: activeButton == "plus" ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  "₹ ${(widget.price * quantity).toStringAsFixed(2)}",
-                  style: AppTextStyles.text18p,
+    SizedBox(width: size.width * 0.04),
+
+    Text(
+      quantity.toString(),
+      style: AppTextStyles.text16p,
+    ),
+
+    SizedBox(width: size.width * 0.04),
+
+    // 🔺 PLUS
+    GestureDetector(
+      onTap: () {
+        setState(() {
+          quantity++;
+          activeButton = "plus";
+        });
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() => activeButton = "");
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: activeButton == "plus"
+              ? Colors.purple
+              : Colors.grey.shade300,
+        ),
+        child: Icon(
+          Icons.add,
+          color: activeButton == "plus"
+              ? Colors.white
+              : Colors.black,
+        ),
+      ),
+    ),
+  ],
+),
+Text( "₹ ${(widget.price * quantity).toStringAsFixed(2)}",
+                  style: AppTextStyles.text18bp,
                 ),
               ],
             ),
-            SizedBox(height: size.height * 0.02),
 
-            // ADD TO CART / VIEW CART BUTTONS
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
+            SizedBox(height: size.height * 0.05),
+
+            SizedBox(
+              height: size.height * 0.05,
               child: Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
+                    child: ActionButton(
+                      text: "Add to cart",
+                      isSelected: selectedAction == "add",
                       onTap: () async {
-                        setState(() {
-                          selectedAction = "add";
-                        });
-                        // Add to cart
-                        bool exists = false;
-                        for (var item in cartItems) {
-                          if (item["name"] == widget.name) {
-                            item["quantity"] += quantity;
-                            exists = true;
-                            break;
-                          }
-                        }
-                        if (!exists) {
-                          cartItems.add({
+                        setState(() => selectedAction = "add");
+
+                        final prefs = await SharedPreferences.getInstance();
+                        String? cartString = prefs.getString('cart');
+
+                        List cart = cartString != null
+                            ? jsonDecode(cartString)
+                            : [];
+
+                        int index = cart.indexWhere(
+                          (item) => item["name"] == widget.name,
+                        );
+
+                        if (index != -1) {
+                          cart[index]["quantity"] =
+                              (cart[index]["quantity"] ?? 1) + quantity;
+                        } else {
+                          cart.add({
                             "name": widget.name,
                             "image": widget.image,
                             "price": widget.price,
@@ -290,54 +341,25 @@ class _ProductBottomSheetState extends State<ProductBottomSheet> {
                           });
                         }
 
-                        await _saveCart();
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Added to cart")),
-                        );
+                        await prefs.setString('cart', jsonEncode(cart));
+                        showBottomToast("Added to cart");
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: selectedAction == "add" ? Colors.purple : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Add to cart",
-                          style: AppTextStyles.text16b.copyWith(
-                            color: selectedAction == "add" ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
+                  SizedBox(width: size.width * 0.1),
                   Expanded(
-                    child: GestureDetector(
+                    child: ActionButton(
+                      text: "View Cart",
+                      isSelected: selectedAction == "cart",
                       onTap: () {
-                        setState(() {
-                          selectedAction = "cart";
-                        });
-
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CartPage(cartItems: cartItems),
+                            builder: (_) =>
+                                CartPage(),
                           ),
                         );
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: selectedAction == "cart" ? Colors.purple : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          "View Cart",
-                          style: selectedAction == "cart"
-                              ? AppTextStyles.text16bb
-                              : AppTextStyles.text16b,
-                        ),
-                      ),
                     ),
                   ),
                 ],

@@ -1,86 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/theme/text.dart';
 
-class CustomTextField extends StatefulWidget {
+class CustomTextField extends StatelessWidget {
+  final TextEditingController controller;
   final String hintText;
+  final TextStyle hintStyle;
   final bool obscureText;
   final IconData? icon;
-   final TextEditingController? controller;
+  final VoidCallback? onIconTap;
+  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
+    required this.controller,
     required this.hintText,
-    this.obscureText = false,
-    this.icon, this.controller,
+    required this.hintStyle,
+    required this.obscureText,
+    this.icon,
+    this.onIconTap,
+    this.onChanged,
   });
 
   @override
-  State<CustomTextField> createState() => _CustomTextFieldState();
-}
-
-class _CustomTextFieldState extends State<CustomTextField> {
-
-  bool isHidden = true;
-  FocusNode focusNode = FocusNode();
-  bool isFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    focusNode.addListener(() {
-      setState(() {
-        isFocused = focusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText, 
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: hintStyle,
 
-    final size = MediaQuery.of(context).size;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      height: size.height * 0.06,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),        
-        border: Border.all(
-          color: isFocused
-              ? const Color.fromARGB(255, 138, 112, 198)
-              : Colors.transparent,
-          width: size.width*0.002,
-        ),
-      ),
-      child: TextField(
-        controller: widget.controller, 
-        focusNode: focusNode,
-        obscureText: widget.obscureText ? isHidden : false,
-        style: AppTextStyles.text16b,
-
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: widget.hintText,
- hintStyle: AppTextStyles.text18g,
- prefixIcon: !widget.obscureText && widget.icon != null
-      ? Icon(widget.icon, color: Colors.grey)
-      : null,
-
-  
-  suffixIcon: widget.obscureText
-      ? IconButton(
-          icon: Icon(
-            isHidden ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: () {
-            setState(() {
-              isHidden = !isHidden;
-            });
-          },
-        )
-      : null,
-        ),
+        suffixIcon: icon != null
+            ? IconButton(
+                icon: Icon(icon),
+                onPressed: onIconTap, color: Colors.grey,
+              )
+            : null,
       ),
     );
   }

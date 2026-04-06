@@ -1,14 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:litshelf/screen/cart%20and%20checkout/order.dart';
 import 'package:litshelf/theme/text.dart';
+import 'package:litshelf/widget/orderrow.dart';
 import 'package:litshelf/widget/purplebutton.dart';
 
 class OrderDetailsPage extends StatelessWidget {
-  const OrderDetailsPage({super.key});
+  final List<Map> books;
+  final double shipping;
+
+  const OrderDetailsPage({
+    super.key,
+    required this.books,
+    required this.shipping, required String deliveryDate, required Map<dynamic, dynamic> book,
+  });
+
+  void _showCancelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Cancel Order"),
+          content: const Text("Are you sure you want to cancel this order?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Order Cancelled")),
+                );
+                Navigator.pop(context);
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    // ✅ Subtotal calculation
+    double subtotal = books.fold(
+      0,
+      (sum, item) => sum + (item["price"] ?? 0).toDouble(),
+    );
+
+    final double total = subtotal + shipping;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -26,7 +70,6 @@ class OrderDetailsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// THANK YOU CARD
               Container(
                 width: double.infinity,
@@ -36,50 +79,49 @@ class OrderDetailsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
-                  children:  [
+                  children: [
+                    Text("Thankyou 👋", style: AppTextStyles.text16p),
+                    SizedBox(height: size.height * 0.01),
                     Text(
-                      "Thankyou 👋",
-                      style: AppTextStyles.text16p
+                      "Your order is confirmed",
+                      style: AppTextStyles.des18bb,
                     ),
-                    SizedBox(height: size.height*0.01),
-                    Text(
-                      "Lorem ipsum dolor sit",
-                      style: AppTextStyles.des18bb
-                    ),
-                    SizedBox(height: size.height*0.01),
+                    SizedBox(height: size.height * 0.01),
                     Text(
                       "Order #2930541",
-                      style: AppTextStyles.text14g
+                      style: AppTextStyles.text14g,
                     ),
                   ],
                 ),
               ),
 
-              SizedBox(height: size.height*0.01),
+              SizedBox(height: size.height * 0.02),
 
-              /// CANCEL TEXT
+              /// CANCEL OPTION
               Row(
-                children:  [
+                children: [
                   Text(
                     "Do you want to cancel your order? ",
-                    style: AppTextStyles.text14g
+                    style: AppTextStyles.text14g,
                   ),
-                  Text(
-                    "Cancel",
-                    style: AppTextStyles.text14pb
+                  GestureDetector(
+                    onTap: () {
+                      _showCancelDialog(context);
+                    },
+                    child: Text(
+                      "Cancel",
+                      style: AppTextStyles.text14pb,
+                    ),
                   ),
                 ],
               ),
 
-               SizedBox(height: size.height*0.02),
+              SizedBox(height: size.height * 0.02),
 
-              /// ORDER DETAILS TITLE
-               Text(
-                "Order Details",
-                style: AppTextStyles.text16bb
-              ),
+              /// TITLE
+              Text("Order Details", style: AppTextStyles.text16bb),
 
-               SizedBox(height: size.height*0.02),
+              SizedBox(height: size.height * 0.02),
 
               /// ORDER DETAILS CARD
               Container(
@@ -90,96 +132,84 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    /// BOOK LIST
+                    Column(
+                      children: books.map((book) {
+                        return Column(
+                          children: [
+                            OrderRowWidget(
+                              left: "1x ${book["name"]}",
+                              right:
+                                  "\$${(book["price"] ?? 0).toStringAsFixed(2)}",
+                            ),
+                            const Divider(),
+                          ],
+                        );
+                      }).toList(),
+                    ),
 
-                    _row("1x  Carrie Fisher", "\$19.99"),
-                    _row("1x  The Da vinci Code", "\$39.99"),
-                    _row("1x  Arcu ipsum feugiat leo odio", "\$27.12"),
+                    /// SUBTOTAL
+                    OrderRowWidget(
+                      left: "Subtotal",
+                      right: "\$${subtotal.toStringAsFixed(2)}",
+                      isBold: true,
+                    ),
 
-                    Divider(height: size.height*0.03),
+                    /// SHIPPING
+                    OrderRowWidget(
+                      left: "Shipping",
+                      right: "\$${shipping.toStringAsFixed(2)}",
+                      isBold: true,
+                    ),
 
-                    _rowBold("Subtotal", "\$87.10"),
-                     SizedBox(height:size.height*0.01),
-                    _rowBold("Shipping", "\$2"),
+                    const Divider(),
 
-                  Divider(height: size.height*0.03),
+                    /// TOTAL
+                    OrderRowWidget(
+                      left: "Total Payment",
+                      right: "\$${total.toStringAsFixed(2)}",
+                      isTotal: true,
+                    ),
 
-                    _rowTotal("Total Payment", "\$89.10"),
+                    const Divider(),
 
-                    SizedBox(height:size.height*0.01),
+                    /// DELIVERY INFO
+                    OrderRowWidget(
+                      left: "Delivery in",
+                      right: "10 - 15 mins",
+                      isGrey: true,
+                    ),
 
-                    _rowGrey("Delivery in", "10 - 15 mins"),
-                   SizedBox(height:size.height*0.01),
-                    _rowGrey("Time", "15.24 - 15.39"),
+                    OrderRowWidget(
+                      left: "Time",
+                      right: "15:24 - 15:39",
+                      isGrey: true,
+                    ),
                   ],
                 ),
               ),
-               SizedBox(height: size.height * 0.04),
-              PurpleButton(text: "Order Status", onTap: (){
- Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const OrderReceivedPage()
-      ),
-    );
-              }),
 
-         
-              /// ORDER STATUS BUTTON
-             SizedBox(height: size.height * 0.04),
+              SizedBox(height: size.height * 0.04),
+
+              /// BUTTON
+              PurpleButton(
+                text: "Order Status",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          OrderReceivedPage(orderId: 'orderid'),
+                    ),
+                  );
+                },
+              ),
+
+              SizedBox(height: size.height * 0.04),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  /// Helpers
-  static Widget _row(String left, String right) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(left, style: const TextStyle(fontSize: 14)),
-          Text(right, style: const TextStyle(fontSize: 14)),
-        ],
-      ),
-    );
-  }
-
-  static Widget _rowBold(String left, String right) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(left, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(right, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  static Widget _rowTotal(String left, String right) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(left, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(
-          right,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF6A5AE0),
-          ),
-        ),
-      ],
-    );
-  }
-
-  static Widget _rowGrey(String left, String right) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(left, style: const TextStyle(color: Colors.grey)),
-        Text(right, style: const TextStyle(color: Colors.grey)),
-      ],
     );
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
-  bool _isLoading = false;      // For signup/login button
-  bool _isInitializing = true;  // For initial app load
+  bool _isLoading = false;
+  bool _isInitializing = true;
   String? _error;
   bool _isLoggedIn = false;
   String? _loggedInEmail;
@@ -21,16 +21,19 @@ class AuthProvider extends ChangeNotifier {
     _initialize();
   }
 
+  /// INIT
   Future<void> _initialize() async {
     await _loadUsers();
     await _checkLoggedIn();
-    _isInitializing = false; // finished loading
+    _isInitializing = false;
     notifyListeners();
   }
 
+  /// LOAD USERS
   Future<void> _loadUsers() async {
     final prefs = await SharedPreferences.getInstance();
     final usersString = prefs.getString('users');
+
     if (usersString != null) {
       _users = List<Map<String, String>>.from(
         json.decode(usersString).map((x) => Map<String, String>.from(x)),
@@ -38,20 +41,24 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// SAVE USERS
   Future<void> _saveUsers() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('users', json.encode(_users));
+    await prefs.setString('users', json.encode(_users));
   }
 
+  /// CHECK LOGIN SESSION
   Future<void> _checkLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('loggedInEmail');
+
     if (email != null) {
       _isLoggedIn = true;
       _loggedInEmail = email;
     }
   }
 
+  /// SIGNUP
   Future<void> signUp(String name, String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -66,19 +73,25 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    _users.add({'name': name, 'email': email, 'password': password});
+    _users.add({
+      'name': name,
+      'email': email,
+      'password': password,
+    });
+
     await _saveUsers();
 
     _loggedInEmail = email;
     _isLoggedIn = true;
 
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('loggedInEmail', email);
+    await prefs.setString('loggedInEmail', email);
 
     _isLoading = false;
     notifyListeners();
   }
 
+  /// LOGIN
   Future<void> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -94,8 +107,9 @@ class AuthProvider extends ChangeNotifier {
     if (user.isNotEmpty) {
       _isLoggedIn = true;
       _loggedInEmail = email;
+
       final prefs = await SharedPreferences.getInstance();
-      prefs.setString('loggedInEmail', email);
+      await prefs.setString('loggedInEmail', email);
     } else {
       _error = "Invalid email or password";
     }
@@ -104,11 +118,14 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// LOGOUT
   Future<void> logout() async {
     _isLoggedIn = false;
     _loggedInEmail = null;
+
     final prefs = await SharedPreferences.getInstance();
-    prefs.remove('loggedInEmail');
+    await prefs.remove('loggedInEmail');
+
     notifyListeners();
   }
 }

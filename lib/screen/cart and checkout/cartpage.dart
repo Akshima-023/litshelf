@@ -1,155 +1,165 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:litshelf/screen/homescreen/dashboard.dart';
+import 'package:litshelf/screen/provider/cartprovider.dart';
+import 'package:provider/provider.dart';
 import 'package:litshelf/screen/cart%20and%20checkout/confirmorder.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:litshelf/widget/purplebutton.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key, required List<Map<String, dynamic>> cartItems}); // No need to pass cartItems
+  const CartPage({super.key});
 
   @override
   State<CartPage> createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
-  List<Map<String, dynamic>> cartItems = [];
-
   @override
   void initState() {
     super.initState();
-    _loadCart();
-  }
 
-  Future<void> _loadCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? cartString = prefs.getString('cart');
-    if (cartString != null) {
-      List decoded = jsonDecode(cartString);
-      setState(() {
-        cartItems = decoded.cast<Map<String, dynamic>>();
-      });
-    }
-  }
-
-  Future<void> _saveCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    String cartString = jsonEncode(cartItems);
-    await prefs.setString('cart', cartString);
-  }
-
-  double getTotalPrice() {
-    double total = 0;
-    for (var item in cartItems) {
-      total += item["price"] * item["quantity"];
-    }
-    return total;
-  }
-
-  void increaseQty(int index) {
-    setState(() {
-      cartItems[index]["quantity"]++;
+    /// Load cart
+    Future.microtask(() {
+      context.read<CartProvider>().loadCart();
     });
-    _saveCart();
   }
 
-  void decreaseQty(int index) {
-    setState(() {
-      if (cartItems[index]["quantity"] > 1) cartItems[index]["quantity"]--;
-    });
-    _saveCart();
-  }
-
-  void removeItem(int index) {
-    setState(() {
-      cartItems.removeAt(index);
-    });
-    _saveCart();
+  /// Navigate to Home/Dashboard
+  void goToHome(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DashboardPage(selectedIndex: 0),
+      ),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-      final size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Cart"),
-        centerTitle: true,
-      ),
-      body: cartItems.isEmpty
-          ? const Center(child: Text("Your cart is empty"))
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: cartItems.length,
-                    itemBuilder: (context, index) {
-                      final item = cartItems[index];
-                      return InkWell( borderRadius: BorderRadius.circular(12),
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConfirmOrderScreen(book: item,),
-      ),
-    );
-  },
-                        child: Container(
-                          margin: const EdgeInsets.all(10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(12),
+    final size = MediaQuery.of(context).size;
+    final cartProvider = Provider.of<CartProvider>(context);
+    final cartItems = cartProvider.cartItems;
+
+    return WillPopScope(
+      onWillPop: () async {
+        goToHome(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("My Cart"),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              goToHome(context);
+            },
+          ),
+        ),
+
+        /// BODY
+        body: cartItems.isEmpty
+            ? const Center(child: Text("Your cart is empty"))
+            : ListView.builder(
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+
+                  return Container(
+                    margin: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        /// IMAGE
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            item["image"],
+                            width: size.width * 0.2,
+                            height: size.height * 0.1,
+                            fit: BoxFit.cover,
                           ),
-                          child: Row(
+                        ),
+
+                        SizedBox(width: size.width * 0.03),
+
+                        /// DETAILS
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  item["image"],
-                                  width: size.width*0.19,
-                                  height: size.height*0.1,
-                                  fit: BoxFit.cover,
-                                ),
+                              Text(
+                                item["name"],
+                                style: AppTextStyles.text16bb,
                               ),
-                               SizedBox(width: size.width*0.01),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(item["name"],
-                                        style: AppTextStyles.text16bb),
-                                     SizedBox(height: size.height*0.01),
-                                    Text("₹${item["price"]}"),
-                                  ],
-                                ),
+                              const SizedBox(height: 5),
+                              Text("₹${item["price"]}"),
+                              const SizedBox(height: 5),
+                              Text(
+                                "Qty: ${item["quantity"]}",
+                                style: AppTextStyles.text16g,
                               ),
-                              Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                          onPressed: () => decreaseQty(index),
-                                          icon: const Icon(Icons.remove)),
-                                      Text(item["quantity"].toString()),
-                                      IconButton(
-                                          onPressed: () => increaseQty(index),
-                                          icon: const Icon(Icons.add)),
-                                    ],
-                                  ),
-                                  IconButton(
-                                    onPressed: () => removeItem(index),
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                  ),
-                                ],
-                              )
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
+
+                        /// ACTIONS
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () =>
+                                      cartProvider.decreaseQty(index),
+                                  icon: const Icon(Icons.remove),
+                                ),
+                                Text(item["quantity"].toString()),
+                                IconButton(
+                                  onPressed: () =>
+                                      cartProvider.increaseQty(index),
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              onPressed: () =>
+                                  cartProvider.removeItem(index),
+                              icon: const Icon(Icons.delete,
+                                  color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+        /// BUY NOW
+        bottomNavigationBar: cartItems.isEmpty
+            ? null
+            : Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: PurpleButton(
+                  text: "Buy Now",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ConfirmOrderScreen(
+                          cartItems: cartItems,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-               ],
-            ),
+              ),
+      ),
     );
   }
 }

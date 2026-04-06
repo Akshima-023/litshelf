@@ -6,7 +6,6 @@ import 'package:litshelf/widget/purplebutton.dart';
 
 class Showpaymentsheet extends StatefulWidget {
   const Showpaymentsheet({super.key});
-
   @override
   State<Showpaymentsheet> createState() => _ShowpaymentsheetState();
 }
@@ -58,7 +57,7 @@ class _ShowpaymentsheetState extends State<Showpaymentsheet> {
                 children: [
                   const Icon(Icons.account_balance_wallet, color: Colors.purple),
                   SizedBox(width: size.width * 0.03),
-                  const Text("UPI / Wallet"),
+                  const Text("Cash on Delivery"),
                 ],
               ),
             ),

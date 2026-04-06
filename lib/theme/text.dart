@@ -93,4 +93,20 @@ class AppTextStyles{
     fontWeight: .bold,
     color:Color.fromARGB(255, 137, 41, 228)
   );
+   static TextStyle des22bw = TextStyle(
+    fontSize: 22,
+   fontWeight: .bold,
+    color:Color.fromARGB(255, 216, 216, 216)
+  );
+   static TextStyle text18bw = TextStyle(
+    fontSize: 18,
+    fontWeight: .bold,
+    color:Colors.white
+  );
+  
+static TextStyle text14w = TextStyle(
+    fontSize: 14,
+   
+    color:Colors.white
+  );
 }

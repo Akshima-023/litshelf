@@ -20,7 +20,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+bool _obscurePassword = true;
   @override
   void initState() {
     super.initState();
@@ -173,8 +173,9 @@ class _MyAccountPageState extends State<MyAccountPage> {
                 Text("Name", style: AppTextStyles.des18b),
                 CustomTextField(
                   hintText: "Enter your name",
+                    hintStyle: AppTextStyles.text16g,
                   controller: _nameController,
-                  icon: null,
+                  icon: null, onIconTap: () {  }, onChanged: (String value) {  }, obscureText: false,
                 ),
 
                 SizedBox(height: size.height * 0.02),
@@ -184,7 +185,8 @@ class _MyAccountPageState extends State<MyAccountPage> {
                 CustomTextField(
                   hintText: "Enter your phone number",
                   controller: _phoneController,
-                  icon: null,
+                  icon: null, onIconTap: () {  }, onChanged: (String value) {  }, obscureText: false,
+                    hintStyle: AppTextStyles.text16g,
                 ),
 
                 SizedBox(height: size.height * 0.02),
@@ -194,20 +196,32 @@ class _MyAccountPageState extends State<MyAccountPage> {
                 CustomTextField(
                   hintText: "Enter your email",
                   controller: _emailController,
-                  icon: null,
+                  icon: null, onIconTap: () {  }, onChanged: (String value) {  }, obscureText: false, hintStyle:  AppTextStyles.text16g,
                 ),
 
                 SizedBox(height: size.height * 0.02),
 
                 // 🔹 PASSWORD
-                Text("Password", style: AppTextStyles.des18b),
-                CustomTextField(
-                  hintText: "Enter your password",
-                  obscureText: true,
-                  controller: _passwordController,
-                  icon: Icons.visibility_off,
-                ),
+               Text("Password", style: AppTextStyles.des18b),
 
+CustomTextField(
+  hintText: "Enter your password",
+  hintStyle: AppTextStyles.text16g,
+  obscureText: _obscurePassword,
+  controller: _passwordController,
+
+  icon: _obscurePassword
+      ? Icons.visibility_off
+      : Icons.visibility,
+
+  onIconTap: () {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  },
+
+  onChanged: (String value) {},
+),
                 SizedBox(height: size.height * 0.05),
 
                 // 🔹 SAVE BUTTON

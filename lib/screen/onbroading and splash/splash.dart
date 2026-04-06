@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/signin%20and%20signup/authprovider.dart';
+import 'package:litshelf/screen/onbroading%20and%20splash/onbroading.dart';
+import 'package:litshelf/screen/signin%20and%20signup/login.dart';
+import 'package:litshelf/screen/provider/authprovider.dart';
+import 'package:litshelf/screen/homescreen/dashboard.dart';
+import 'package:litshelf/theme/text.dart';
+import 'package:litshelf/widget/onbroad.dart';
 import 'package:provider/provider.dart';
-
-import '../homescreen/dashboard.dart';
-import '../signin and signup/login.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -13,6 +16,7 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
   @override
   void initState() {
     super.initState();
@@ -20,14 +24,17 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _navigate() async {
+    /// Wait for splash duration
+    await Future.delayed(const Duration(seconds: 2));
+
     final auth = Provider.of<AuthProvider>(context, listen: false);
 
-    // Wait until provider finishes initialization
-    while (auth.isInitializing) {
-      await Future.delayed(const Duration(milliseconds: 100));
+    /// Optional: wait if still initializing
+    if (auth.isInitializing) {
+      await Future.delayed(const Duration(seconds: 1));
     }
 
-    await Future.delayed(const Duration(seconds: 1)); // optional splash delay
+    if (!mounted) return;
 
     if (auth.isLoggedIn) {
       Navigator.pushReplacement(
@@ -37,15 +44,32 @@ class _SplashPageState extends State<SplashPage> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const Login()),
+        MaterialPageRoute(builder: (_) =>Onbroading() ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    final size = MediaQuery.of(context).size;
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 210, 185, 214),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children:  [
+           Image.asset("assets/book.png",width: size.width*0.3,
+           height: size.height*0.3,),
+            SizedBox(height: size.height*0.001),
+            Text(
+              "LitShelf",
+              style: AppTextStyles.des24bb
+            ),
+            SizedBox(height:size.height*0.02),
+            CircularProgressIndicator(),
+          ],
+        ),
+      ),
     );
   }
 }

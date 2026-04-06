@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:litshelf/screen/provider/locationprovider.dart';
 import 'package:litshelf/widget/customformfield.dart';
 import 'package:litshelf/widget/purplebutton.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:provider/provider.dart';
 
 class LocationFormPage extends StatefulWidget {
   const LocationFormPage({super.key});
@@ -18,23 +18,42 @@ class _LocationFormPageState extends State<LocationFormPage> {
   final cityController = TextEditingController();
   final blockController = TextEditingController();
   final streetController = TextEditingController();
-  @override
-void initState() {
-  super.initState();
-  loadSavedData();
-}
-void loadSavedData() async {
-  final prefs = await SharedPreferences.getInstance();
 
-  setState(() {
-    phoneController.text = prefs.getString("phone") ?? "";
-    nameController.text = prefs.getString("name") ?? "";
-    governorateController.text = prefs.getString("governorate") ?? "";
-    cityController.text = prefs.getString("city") ?? "";
-    blockController.text = prefs.getString("block") ?? "";
-    streetController.text = prefs.getString("street") ?? "";
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider =
+          Provider.of<LocationProvider>(context, listen: false);
+
+      /// ✅ LOAD SAVED DATA FIRST
+      await provider.loadLocations();
+
+      final homeData = provider.getLocation("home");
+
+      /// ✅ UPDATE UI
+      setState(() {
+        phoneController.text = homeData["phone"] ?? "";
+        nameController.text = homeData["name"] ?? "";
+        governorateController.text = homeData["governorate"] ?? "";
+        cityController.text = homeData["city"] ?? "";
+        blockController.text = homeData["block"] ?? "";
+        streetController.text = homeData["street"] ?? "";
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    nameController.dispose();
+    governorateController.dispose();
+    cityController.dispose();
+    blockController.dispose();
+    streetController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +68,8 @@ void loadSavedData() async {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Location",
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text("Location",
+            style: TextStyle(color: Colors.black)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -71,54 +88,64 @@ void loadSavedData() async {
             SizedBox(height: size.height * 0.04),
 
             PurpleButton(
-  text: "Confirmation",
-  onTap: () async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Save Address"),
-        content: const Text("Save this address as?"),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
+              text: "Confirmation",
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Save Address"),
+                    content: const Text("Save this address as?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () async {
+                          final provider =
+                              Provider.of<LocationProvider>(context,
+                                  listen: false);
 
-              await prefs.setString("home_phone", phoneController.text);
-              await prefs.setString("home_name", nameController.text);
-              await prefs.setString("home_governorate", governorateController.text);
-              await prefs.setString("home_city", cityController.text);
-              await prefs.setString("home_block", blockController.text);
-              await prefs.setString("home_street", streetController.text);
+                          await provider.saveLocation("home", {
+                            "phone": phoneController.text,
+                            "name": nameController.text,
+                            "governorate": governorateController.text,
+                            "city": cityController.text,
+                            "block": blockController.text,
+                            "street": streetController.text,
+                          });
 
-              
-              Navigator.pop(context); 
-              Navigator.pop(context, "Home");// go back
-            },
-            child: const Text("Home"),
-          ),
+                          provider.setSelectedType("home");
 
-          TextButton(
-            onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
+                          Navigator.pop(context);
+                          Navigator.pop(context, "Home");
+                        },
+                        child: const Text("Home"),
+                      ),
 
-              await prefs.setString("office_phone", phoneController.text);
-              await prefs.setString("office_name", nameController.text);
-              await prefs.setString("office_governorate", governorateController.text);
-              await prefs.setString("office_city", cityController.text);
-              await prefs.setString("office_block", blockController.text);
-              await prefs.setString("office_street", streetController.text);
+                      TextButton(
+                        onPressed: () async {
+                          final provider =
+                              Provider.of<LocationProvider>(context,
+                                  listen: false);
 
-             
-              Navigator.pop(context);
-              Navigator.pop(context, "office");
-            },
-            child: const Text("Office"),
-          ),
-        ],
-      ),
-    );
-  },
-),
+                          await provider.saveLocation("office", {
+                            "phone": phoneController.text,
+                            "name": nameController.text,
+                            "governorate": governorateController.text,
+                            "city": cityController.text,
+                            "block": blockController.text,
+                            "street": streetController.text,
+                          });
+
+                          provider.setSelectedType("office");
+
+                          Navigator.pop(context);
+                          Navigator.pop(context, "Office");
+                        },
+                        child: const Text("Office"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
             SizedBox(height: size.height * 0.04),
           ],

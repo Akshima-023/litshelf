@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:litshelf/screen/signin%20and%20signup/authprovider.dart';
+import 'package:litshelf/screen/provider/authprovider.dart';
 import 'package:litshelf/theme/text.dart';
 import 'package:litshelf/widget/customtextfield.dart';
 import 'package:litshelf/widget/purplebutton.dart';
@@ -19,11 +19,21 @@ class _SignupState extends State<Signup> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _obscurePassword = true; // ✅ added
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
-
     final Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -34,6 +44,8 @@ class _SignupState extends State<Signup> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: size.height * 0.02),
+
+                /// BACK BUTTON
                 IconButton(
                   icon: const Icon(Icons.arrow_back, size: 30),
                   onPressed: () {
@@ -43,42 +55,75 @@ class _SignupState extends State<Signup> {
                     );
                   },
                 ),
+
                 SizedBox(height: size.height * 0.001),
+
                 Text("Sign Up", style: AppTextStyles.des24bb),
+
                 SizedBox(height: size.height * 0.0001),
-                Text("Create account and choose favourite menu",
-                    style: AppTextStyles.text18g),
-                SizedBox(height: size.height * 0.02),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Name", style: AppTextStyles.des18b),
-                    SizedBox(height: size.height * 0.001),
-                    CustomTextField(
-                      hintText: "Enter your name",
-                      controller: _nameController,
-                      icon: null,
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    Text("Email", style: AppTextStyles.des18b),
-                    SizedBox(height: size.height * 0.001),
-                    CustomTextField(
-                      hintText: "Enter your email",
-                      controller: _emailController,
-                      icon: null,
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    Text("Password", style: AppTextStyles.des18b),
-                    SizedBox(height: size.height * 0.001),
-                    CustomTextField(
-                      hintText: "Enter your password",
-                      obscureText: true,
-                      controller: _passwordController,
-                      icon: Icons.visibility_off,
-                    ),
-                  ],
+
+                Text(
+                  "Create account and choose favourite menu",
+                  style: AppTextStyles.text18g,
                 ),
+
+                SizedBox(height: size.height * 0.02),
+
+                /// NAME
+                Text("Name", style: AppTextStyles.des18b),
+                SizedBox(height: size.height * 0.001),
+
+                CustomTextField(
+                  hintText: "Enter your name",
+                  hintStyle: AppTextStyles.text16g,
+                  controller: _nameController,
+                  obscureText: false,
+                  onChanged: (value) {},
+                ),
+
+                SizedBox(height: size.height * 0.02),
+
+                /// EMAIL
+                Text("Email", style: AppTextStyles.des18b),
+                SizedBox(height: size.height * 0.001),
+
+                CustomTextField(
+                  hintText: "Enter your email",
+                  hintStyle: AppTextStyles.text16g,
+                  controller: _emailController,
+                  obscureText: false,
+                  onChanged: (value) {},
+                ),
+
+                SizedBox(height: size.height * 0.02),
+
+                /// PASSWORD
+                Text("Password", style: AppTextStyles.des18b),
+                SizedBox(height: size.height * 0.001),
+
+                CustomTextField(
+                  hintText: "Enter your password",
+                  hintStyle: AppTextStyles.text16g,
+                  controller: _passwordController,
+
+                  obscureText: _obscurePassword,
+
+                  icon: _obscurePassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+
+                  onIconTap: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+
+                  onChanged: (value) {},
+                ),
+
                 SizedBox(height: size.height * 0.05),
+
+                /// BUTTON
                 auth.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : PurpleButton(
@@ -88,10 +133,13 @@ class _SignupState extends State<Signup> {
                           final email = _emailController.text.trim();
                           final password = _passwordController.text.trim();
 
-                          if (name.isEmpty || email.isEmpty || password.isEmpty) {
+                          if (name.isEmpty ||
+                              email.isEmpty ||
+                              password.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("Please fill all fields")),
+                                content: Text("Please fill all fields"),
+                              ),
                             );
                             return;
                           }
@@ -102,7 +150,9 @@ class _SignupState extends State<Signup> {
                             if (!mounted) return;
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => const Register()),
+                              MaterialPageRoute(
+                                builder: (_) => const Register(),
+                              ),
                             );
                           } else if (auth.error != null) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -111,29 +161,44 @@ class _SignupState extends State<Signup> {
                           }
                         },
                       ),
+
                 SizedBox(height: size.height * 0.02),
+
+                /// LOGIN LINK
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Have an account?", style: AppTextStyles.text18g),
+                    Text("Have an account?",
+                        style: AppTextStyles.text18g),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const Login()),
+                          MaterialPageRoute(
+                              builder: (context) => const Login()),
                         );
                       },
-                      child: Text("Sign in", style: AppTextStyles.text18p),
+                      child: Text(" Sign in",
+                          style: AppTextStyles.text18p),
                     ),
                   ],
                 ),
+
                 SizedBox(height: size.height * 0.09),
+
+                /// TERMS
                 Center(
-                    child: Text("By clicking Register,you agreed to our",
-                        style: AppTextStyles.text18g)),
+                  child: Text(
+                    "By clicking Register, you agreed to our",
+                    style: AppTextStyles.text18g,
+                  ),
+                ),
                 Center(
-                    child:
-                        Text("Terms,Data Policy", style: AppTextStyles.text18p)),
+                  child: Text(
+                    "Terms, Data Policy",
+                    style: AppTextStyles.text18p,
+                  ),
+                ),
               ],
             ),
           ),
