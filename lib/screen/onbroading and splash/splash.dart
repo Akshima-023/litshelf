@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:litshelf/screen/onbroading%20and%20splash/onbroading.dart';
-import 'package:litshelf/screen/signin%20and%20signup/login.dart';
 import 'package:litshelf/screen/provider/authprovider.dart';
 import 'package:litshelf/screen/homescreen/dashboard.dart';
 import 'package:litshelf/theme/text.dart';
-import 'package:litshelf/widget/onbroad.dart';
 import 'package:provider/provider.dart';
 
 class SplashPage extends StatefulWidget {
